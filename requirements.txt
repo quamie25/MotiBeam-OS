@@ -1,0 +1,26 @@
+# MotiBeam OS - Python Dependencies
+# Installation: pip install -r requirements.txt
+
+# Core Graphics and Display
+pygame==2.5.2
+
+# Computer Vision and Image Processing
+opencv-python==4.8.1.78
+numpy==1.24.3
+
+# Voice Recognition
+SpeechRecognition==3.10.0
+PyAudio==0.2.14
+
+# System and Utilities
+python-dateutil==2.8.2
+
+# Optional: Enhanced audio support for Raspberry Pi
+# Uncomment if needed:
+# pyalsaaudio==0.10.0
+# sounddevice==0.4.6
+
+# Optional: Advanced gesture recognition
+# Uncomment for enhanced features:
+# mediapipe==0.10.8
+# dlib==19.24.2
