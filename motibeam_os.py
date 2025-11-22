@@ -66,15 +66,13 @@ def draw_demo_screen(demo_name, instructions, status=""):
     pygame.draw.rect(screen, (0, 50, 100), header)
     
     title_surf = font_large.render(demo_name, True, (255, 255, 255))
-    screen.blit(title_surf, (screen.get_width()//2 - title_surf.get_width()//2, 
-20))
+    screen.blit(title_surf, (screen.get_width()//2 - title_surf.get_width()//2, 20))
     
     # Demo content
     y_offset = 120
     for line in instructions:
         instr_surf = font_medium.render(line, True, (200, 230, 255))
-        screen.blit(instr_surf, (screen.get_width()//2 - 
-instr_surf.get_width()//2, y_offset))
+        screen.blit(instr_surf, (screen.get_width()//2 - instr_surf.get_width()//2, y_offset))
         y_offset += 50
     
     # Status bar
@@ -85,8 +83,7 @@ instr_surf.get_width()//2, y_offset))
     # Footer
     footer_text = "SPACE: Next Demo  |  Q: Quit  |  Host: motibeamOS"
     footer_surf = font_small.render(footer_text, True, (150, 200, 255))
-    screen.blit(footer_surf, (screen.get_width()//2 - footer_surf.get_width()//2, 
-screen.get_height() - 80))
+    screen.blit(footer_surf, (screen.get_width()//2 - footer_surf.get_width()//2, screen.get_height() - 80))
     
     pygame.display.flip()
 
@@ -124,8 +121,8 @@ def maritime_demo():
         "Water Detection: Sensors Active",
         "First Responder Coordination"
     ]
-    draw_demo_screen(DEMOS[2], instructions, "STATUS: DRILL MODE | All Systems 
-Go")
+    status_text = "STATUS: DRILL MODE | All Systems Operational"  # FIXED LINE
+    draw_demo_screen(DEMOS[2], instructions, status_text)
 
 def enterprise_demo():
     instructions = [
@@ -147,8 +144,7 @@ def security_demo():
         "Tactical Overlays: Active",
         "VA/DoD Deployment Ready"
     ]
-    draw_demo_screen(DEMOS[4], instructions, "Alert Level: GREEN | All Systems 
-Secure")
+    draw_demo_screen(DEMOS[4], instructions, "Alert Level: GREEN | All Systems Secure")
 
 def education_demo():
     instructions = [
@@ -176,8 +172,7 @@ DEMO_FUNCTIONS = {
 print("\n" + "="*50)
 print("🚀 MOTIBEAM OS - SIX VERTICAL DEMO ENGINE")
 print("📍 Hostname: motibeamOS | User: motibeam")
-print("📊 Verticals: Clinical, Automotive, Maritime, Enterprise, Security, 
-Education")
+print("📊 Verticals: Clinical, Automotive, Maritime, Enterprise, Security, Education")
 print("="*50)
 print("Press SPACEBAR to cycle through demos")
 print("Press Q to quit")
