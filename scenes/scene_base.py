@@ -11,23 +11,30 @@ from datetime import datetime
 class MotiBeamScene:
     """Base class for MotiBeam demo scenes"""
     
-    def __init__(self, width=1280, height=720, title="MotiBeam Demo", fullscreen=True):
-        pygame.init()
+    def __init__(self, width=1280, height=720, title="MotiBeam Demo", fullscreen=True, standalone=True):
+        if standalone:
+            pygame.init()
+        
         self.width = width
         self.height = height
+        self.standalone = standalone
         
-        # Try fullscreen first, fallback to windowed
-        if fullscreen:
-            try:
-                self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
-            except:
-                print("Fullscreen failed, using windowed mode")
+        # Create screen only if standalone
+        if standalone:
+            if fullscreen:
+                try:
+                    self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+                except:
+                    print("Fullscreen failed, using windowed mode")
+                    self.screen = pygame.display.set_mode((width, height))
+            else:
                 self.screen = pygame.display.set_mode((width, height))
-        else:
-            self.screen = pygame.display.set_mode((width, height))
             
-        pygame.display.set_caption(title)
-        pygame.mouse.set_visible(False)
+            pygame.display.set_caption(title)
+            pygame.mouse.set_visible(False)
+        else:
+            # Screen will be assigned by parent app
+            self.screen = None
         
         self.clock = pygame.time.Clock()
         self.running = True
@@ -115,6 +122,8 @@ class MotiBeamScene:
             self.render()
             pygame.display.flip()
             self.clock.tick(30)
-            
-        pygame.quit()
+        
+        # Only quit pygame if standalone
+        if self.standalone:
+            pygame.quit()
         print("Scene complete.")
