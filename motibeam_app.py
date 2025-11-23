@@ -55,11 +55,11 @@ class MotiBeamOS:
         self.boot_start_time = pygame.time.get_ticks()
         self.boot_duration = 2000  # 2 seconds boot animation
 
-        # Fonts
-        self.font_small = pygame.font.Font(None, 28)
-        self.font_medium = pygame.font.Font(None, 48)
-        self.font_large = pygame.font.Font(None, 64)
-        self.font_huge = pygame.font.Font(None, 96)
+        # Fonts - Larger for projection
+        self.font_small = pygame.font.Font(None, 36)
+        self.font_medium = pygame.font.Font(None, 56)
+        self.font_large = pygame.font.Font(None, 72)
+        self.font_huge = pygame.font.Font(None, 110)
 
         # Demo instances (created when needed)
         self.education_demo = None
@@ -150,19 +150,20 @@ class MotiBeamOS:
             ("7", "Smart Home", COLORS['home'], "Home control & family dashboard"),
         ]
 
-        y_start = 240
-        y_spacing = 70
+        y_start = 220
+        y_spacing = 68
 
         for i, (key, name, color, desc) in enumerate(verticals):
             y_pos = y_start + (i * y_spacing)
 
-            # Key and name
-            key_text = f"{key} -"
-            self.draw_text(key_text, (200, y_pos), self.font_medium, color)
-            self.draw_text(name, (280, y_pos), self.font_medium, COLORS['text'])
+            # Key and name - centered
+            full_text = f"{key} - {name}"
+            self.draw_text(full_text, (DISPLAY_WIDTH // 2, y_pos),
+                          self.font_medium, color, align='center')
 
-            # Description
-            self.draw_text(desc, (300, y_pos + 35), self.font_small, COLORS['muted'])
+            # Description - centered below
+            self.draw_text(desc, (DISPLAY_WIDTH // 2, y_pos + 40),
+                          self.font_small, COLORS['muted'], align='center')
 
         # Footer instructions
         self.draw_text("Press number key to launch vertical | ESC to exit",
