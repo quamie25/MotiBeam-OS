@@ -8,7 +8,7 @@ Wants=network.target sound.target
 Type=simple
 User=motibeam
 Group=motibeam
-WorkingDirectory=/home/motibeam/motibeam-os
+WorkingDirectory=/home/motibeam/MotiBeam-OS
 
 # Environment variables
 Environment="DISPLAY=:0"
@@ -17,7 +17,7 @@ Environment="PULSE_SERVER=/run/user/1000/pulse/native"
 Environment="XDG_RUNTIME_DIR=/run/user/1000"
 
 # Execution
-ExecStart=/home/motibeam/motibeam-os/venv/bin/python /home/motibeam/motibeam-os/motibeam_os.py
+ExecStart=/home/motibeam/MotiBeam-OS/motibeam-env/bin/python /home/motibeam/MotiBeam-OS/motibeam_app.py
 
 # Restart policy
 Restart=on-failure
@@ -40,7 +40,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/motibeam/motibeam-os
+ReadWritePaths=/home/motibeam/MotiBeam-OS
 
 # Device access (required for camera and microphone)
 DeviceAllow=/dev/video0 rw
