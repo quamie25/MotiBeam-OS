@@ -1,0 +1,229 @@
+🌟 MotiBeam OS - Quick Reference Guide
+Everything you need to remember about your MotiBeam system
+
+✅ WHAT YOU HAVE
+
+Hardware:
+• Raspberry Pi 5 (hostname: motibeamOS, username: motibeam)
+• GOODEE Pico Projector (1280×720, connected via HDMI)
+• Logitech 1080P USB Webcam (USB)
+• Fifine K669D USB Microphone (USB)
+• Mac (for SSH access)
+
+Software:
+• MotiBeam OS v3.0 with 7 vertical demos
+• Education vertical (5th grade learning) - ACTIVE
+• Smart Home vertical (home control) - ACTIVE
+• Professional boot screen
+• Interactive menus
+• Pure black "wall looks alive" design
+• Auto-start on boot (configured)
+
+🚀 HOW TO START MOTIBEAM
+
+Option 1: Auto-Start (Power On)
+1. Plug in Raspberry Pi power
+2. Wait ~1 minute
+3. MotiBeam boot screen appears on projector automatically
+4. Main menu shows up after boot
+
+Option 2: Manual Start (via SSH)
+
+From your Mac Terminal:
+
+# Connect to Pi
+ssh motibeam@motibeamos.local
+
+# Navigate to project
+cd ~/MotiBeam-OS
+
+# Activate Python environment
+source motibeam-env/bin/activate
+
+# Run MotiBeam
+python3 motibeam_app.py
+
+🎮 HOW TO USE MOTIBEAM
+
+Main Menu Controls:
+• Press 1: Clinical Care (coming soon)
+• Press 2: Automotive (coming soon)
+• Press 3: Emergency Response (coming soon)
+• Press 4: Industrial (coming soon)
+• Press 5: Security (coming soon)
+• Press 6: Education (5th Grade Learning) ✅ ACTIVE
+• Press 7: Smart Home (Family Control) ✅ ACTIVE
+• Press ESC: Exit MotiBeam OS
+
+📚 EDUCATION VERTICAL (Press 6)
+
+Education Menu:
+• Press 1: Math Word Problems
+• Press 2: Vocabulary Builder
+• Press 3: Sleep Mode (Ambient Learning)
+• Press ESC: Return to Main Menu
+
+Math Word Problems:
+• Read the question on screen
+• Press SPACE: Show answer
+• Press N: Next problem
+• Press ESC: Back to education menu
+
+Vocabulary Builder:
+• View all vocabulary words and definitions
+• Press ESC: Back to education menu
+
+Sleep Mode:
+• Content fades in and out automatically
+• Perfect for overnight ambient learning
+• Pure black background (wall looks alive)
+• Math facts, vocabulary, science concepts
+• Press ESC: Exit sleep mode
+
+🏠 SMART HOME VERTICAL (Press 7)
+
+Home Menu:
+• Press 1: Family Dashboard
+• Press 2: Doorbell Monitor
+• Press 3: Package Tracker
+• Press 4: Smart Home Controls
+• Press 5: Family Messages
+• Press ESC: Return to Main Menu
+
+Family Dashboard:
+• Shows current time and date
+• Home status (lights, door, garage, thermostat)
+• Recent activity log
+• Press ESC: Back to home menu
+
+Smart Home Controls:
+• Press L: Toggle lights on/off
+• Press D: Lock/unlock front door
+• Press G: Open/close garage
+• Press + or =: Increase temperature
+• Press -: Decrease temperature
+• Press ESC: Back to home menu
+
+Package Tracker:
+• View delivery status
+• See expected arrival times
+• Press ESC: Back to home menu
+
+Doorbell Monitor & Family Messages:
+• View information
+• Press ESC: Back to home menu
+
+⌨️ UNIVERSAL CONTROLS
+
+ESC Key Behavior:
+• From any sub-screen → Returns to that vertical's menu
+• From vertical menu → Returns to main menu
+• From main menu → Exits MotiBeam OS cleanly (no freeze)
+
+Navigation:
+• Always use number keys (1-7) for menu selection
+• ESC always goes back one level
+• Space bar shows answers in math mode
+• Letter keys (L, D, G) control devices in smart home
+
+🛠️ TROUBLESHOOTING
+
+If screen freezes:
+• Press ESC to return to menu
+• If completely stuck, SSH in and restart:
+  ssh motibeam@motibeamos.local
+  sudo systemctl restart motibeam
+
+If text is cut off:
+• Fixed in v3.0 - proper text wrapping enabled
+
+If emojis show as boxes:
+• Fixed in v3.0 - now using ASCII symbols
+
+If background looks like TV:
+• Fixed in v3.0 - pure black background (0, 0, 0)
+
+If not fullscreen:
+• Fixed in v3.0 - automatic fullscreen mode
+
+To update MotiBeam:
+cd ~/MotiBeam-OS
+git pull origin claude/fix-motibeam-syntax-error-015q8MozeH9e35Bm4QPTa2EV
+
+To restart service:
+sudo systemctl restart motibeam
+
+To stop service:
+sudo systemctl stop motibeam
+
+To check status:
+sudo systemctl status motibeam
+
+📝 IMPORTANT NOTES FOR MEMORY
+
+Your Setup:
+• Mac connects to Pi via SSH: ssh motibeam@motibeamos.local
+• Main app file: motibeam_app.py
+• Virtual environment: ~/MotiBeam-OS/motibeam-env
+• Always activate env before running: source motibeam-env/bin/activate
+
+For Your Daughter (5th Grade):
+1. Turn on projector
+2. Turn on Raspberry Pi
+3. Wait for main menu to appear
+4. Press 6 for Education
+5. Press 1 for Math, 2 for Vocab, or 3 for Sleep Mode
+6. Press ESC when done
+
+Standalone Testing:
+• Education only: python3 education_demo.py
+• Smart Home only: python3 home_demo.py
+• Full system: python3 motibeam_app.py
+
+🎯 DESIGN PHILOSOPHY
+
+"Make the wall look alive, not like a TV"
+
+• Pure black backgrounds (0, 0, 0)
+• Content floats naturally on wall
+• No blue glow or rectangles
+• Minimal visual footprint
+• Information appears and disappears organically
+
+💡 CURRENT STATUS
+
+✅ Working Features:
+• Boot animation with progress bar
+• Main menu with 7 verticals
+• Education vertical (Math, Vocab, Sleep mode)
+• Smart Home vertical (Dashboard, Controls, Packages, Messages)
+• Pure black background design
+• Fullscreen projection
+• Proper ESC handling (no freezes)
+• Text wrapping (no cutoff)
+• ASCII symbols (no emoji boxes)
+
+🔄 Coming Soon:
+• Clinical care vertical
+• Automotive vertical
+• Emergency response vertical
+• Industrial vertical
+• Security vertical
+
+📞 QUICK HELP
+
+If you forget controls:
+• Just press ESC until you get back to main menu
+• Main menu always shows the options
+
+If something breaks:
+• SSH in: ssh motibeam@motibeamos.local
+• Restart: sudo systemctl restart motibeam
+
+For new features or changes:
+• Pull latest: git pull origin claude/fix-motibeam-syntax-error-015q8MozeH9e35Bm4QPTa2EV
+• Restart service
+
+---
+MotiBeam OS v3.0 | Pure Black Design | Education & Home Verticals Active
+Built for veterans, students, and families 🌟
