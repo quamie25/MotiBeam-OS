@@ -1,358 +1,407 @@
 # 🌟 MotiBeam OS
 
-**Advanced Projection-Based Assistive Technology System**
+**Multi-Vertical Ambient Computing Platform**
 
-MotiBeam OS is a production-ready ambient computing platform that transforms any surface into an interactive assistive technology interface using projection, voice control, and gesture detection.
+MotiBeam OS transforms any wall into an interactive ambient computing surface using projection technology. With 7 specialized verticals, it serves clinical care, education, smart home control, and more—all with a "wall looks alive" design that makes content float naturally without the TV-in-a-box look.
 
-## 🎯 Features
+## 🎯 What is MotiBeam OS?
 
-### ✅ Core Functionality (All Working)
-- **Multi-Demo System**: Three interactive demonstration modes
-  - Clinical Medication Tracker with voice/gesture confirmation
-  - Interactive Drill Assistant with step-by-step guidance
-  - General Interactive Guidance System
-- **Professional UI**: Smooth transitions, progress bars, color-coded status indicators
-- **Automatic Demo Cycling**: Seamlessly transitions between demos every 10 seconds
+MotiBeam OS is a projection-based platform designed for:
+- **Veterans with memory decline** - Visual medication tracking and reminders
+- **K-12 Education** - Interactive learning with ambient sleep mode
+- **Smart Homes** - Family dashboard and home control
+- **Healthcare** - Medication compliance and health monitoring
+- **Automotive** - Vehicle maintenance assistance
+- **Emergency Response** - Step-by-step emergency procedures
+- **Industrial** - Work safety and procedural guidance
+- **Security** - Real-time monitoring and alerts
 
-### 🎤 Voice Control Integration
-- **Speech Recognition**: Real-time voice command processing
-- **Medication Tracking**: Say "medication taken" to confirm doses
-- **Microphone Status**: Live indicator showing listening state
-- **Graceful Fallback**: Continues operation without voice hardware
+## ✨ Key Features
 
-### 👤 Gesture Detection
-- **Face Detection**: OpenCV Haar cascade face tracking
-- **Head Nod Recognition**: Detect vertical head movements for confirmation
-- **Real-time Feedback**: Visual status indicators for gesture detection
-- **Graceful Fallback**: Works without camera hardware
+### 🎓 Education Vertical (Fully Implemented)
+**Perfect for 5th grade learning**
+- **Math Word Problems** - Step-by-step problem solving with hints
+- **Vocabulary Builder** - Word definitions and learning
+- **Sleep Mode** - Ambient learning with fading content
+  - Pure black background (wall looks alive, not like TV)
+  - ASCII symbols (no emoji rendering issues)
+  - Proper text wrapping (no cutoff)
+  - Smooth fade in/out animations
+- **Controls**: Press 1 (Math), 2 (Vocab), 3 (Sleep), ESC (Exit)
 
-### 📷 Real Sensor Data
-- **Live Camera Feed**: Picture-in-picture preview in corner
-- **Real-time FPS Counter**: Monitor camera performance
-- **Environment Brightness**: Automatic brightness detection
-- **Performance Metrics**: Frame rate and system monitoring
+### 🏠 Smart Home Vertical (Fully Implemented)
+**Compete with Ring, Nest, Alexa, Apple Home**
+- **Family Dashboard** - Home status overview
+- **Doorbell Monitor** - Front door camera view
+- **Package Tracker** - Delivery notifications
+- **Smart Controls** - Lights, thermostat, door, garage
+- **Family Messages** - Message board for the family
+- **Interactive Controls**: L (Lights), D (Door), G (Garage), +/- (Temp)
 
-### 🎨 Professional UI Enhancements
-- **MotiBeam Logo Header**: Branded interface with system info
-- **Smooth Transitions**: Animated progress between demos
-- **Progress Bars**: Visual feedback for demo timing
-- **Color-Coded Status**: Success (green), warning (amber), error (red)
-- **Responsive Design**: Optimized for 1280x720 projection
+### 🏥 Clinical, Automotive, Emergency, Industrial, Security
+**Coming Soon** - Placeholder screens ready for development
 
-### 🛡️ Error Handling
-- **Try/Except Blocks**: All hardware operations protected
-- **Graceful Degradation**: Features disable when hardware unavailable
-- **Clear Error Messages**: Informative status updates
-- **Logging**: Console output for debugging
+### 🎨 "Wall Looks Alive" Design
+- **Pure Black Background** - Content floats on wall naturally
+- **No TV Box Look** - Minimal background, maximum impact
+- **Fullscreen Projection** - Immersive experience
+- **Smooth Transitions** - Professional animations
 
-### 🚀 Deployment Ready
-- **One-Command Install**: Automated installation script
-- **Systemd Service**: Auto-start on boot
-- **Resource Management**: CPU and memory limits
-- **Security Hardening**: Protected file system access
+### ⌨️ Universal ESC Handling
+- **ESC from any vertical** → Returns to main menu
+- **ESC from main menu** → Clean exit (no freeze)
+- **No stuck screens** → Reliable navigation throughout
 
-## 🖥️ Hardware Requirements
+## 🖥️ Hardware Setup
 
-### Confirmed Compatible Hardware
-- **Raspberry Pi 5** (4GB or 8GB RAM recommended)
-- **GOODEE Pico Projector** (1280x720 resolution)
-- **Fifine K669D USB Microphone** (or any USB microphone)
-- **Logitech 1080P USB Camera** (or any USB webcam)
-- **Raspberry Pi OS 64-bit** (Bookworm or later)
+### Confirmed Working Configuration
+- **Raspberry Pi 5** (4GB or 8GB)
+- **GOODEE Pico Projector** (1280x720)
+- **Logitech 1080P USB Camera** (optional)
+- **Fifine K669D USB Microphone** (optional)
+- **Raspberry Pi OS 64-bit** (Bookworm)
 
-### Minimum Requirements
-- **Raspberry Pi 4** or newer
-- **Any HD projector** (720p minimum)
-- **USB microphone** (optional, for voice control)
-- **USB webcam** (optional, for gesture detection)
-- **Raspberry Pi OS** or any Debian-based Linux
+### Display Resolution
+- **1280x720** (720p) - Optimized for projectors
+- **Pure Black Background** - Saves projector bulb life
+- **Fullscreen Mode** - Automatic on launch
 
-## 📦 Installation
+## 📦 Quick Start
 
-### Quick Install (Recommended)
+### Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/quamie25/MotiBeam-OS.git
 cd MotiBeam-OS
 
-# Run the installation script
-sudo ./install_pi.sh
-
-# Reboot to apply all settings
-sudo reboot
-```
-
-The installation script will:
-1. ✅ Install all system dependencies
-2. ✅ Configure camera, microphone, and display
-3. ✅ Create Python virtual environment
-4. ✅ Install Python packages
-5. ✅ Set up systemd service for auto-start
-6. ✅ Configure permissions and access
-7. ✅ Run system tests
-
-### Manual Installation
-
-```bash
-# Install system dependencies
-sudo apt-get update
-sudo apt-get install -y python3 python3-pip python3-venv \
-    portaudio19-dev libopencv-dev python3-opencv \
-    libsdl2-dev v4l-utils alsa-utils
-
 # Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv motibeam-env
+source motibeam-env/bin/activate
 
-# Install Python packages
-pip install -r requirements.txt
+# Install dependencies
+pip install pygame
 
 # Run MotiBeam OS
-python motibeam_os.py
+python3 motibeam_app.py
 ```
 
-## 🎮 Usage
+### First Run
 
-### Automatic Start
-MotiBeam OS starts automatically on boot when installed via `install_pi.sh`.
+1. **Boot Screen** appears with MotiBeam logo and progress bar (2 seconds)
+2. **Main Menu** shows all 7 verticals
+3. Press **6** for Education or **7** for Smart Home
+4. Press **ESC** to navigate back or exit
 
-### Manual Control
+## 🎮 Controls & Navigation
 
-```bash
-# Start the service
-sudo systemctl start motibeam
+### Main Menu
+| Key | Vertical |
+|-----|----------|
+| `1` | Clinical Care |
+| `2` | Automotive |
+| `3` | Emergency Response |
+| `4` | Industrial |
+| `5` | Security |
+| `6` | **Education** (Active) |
+| `7` | **Smart Home** (Active) |
+| `ESC` | Exit MotiBeam OS |
 
-# Stop the service
-sudo systemctl stop motibeam
-
-# Check status
-sudo systemctl status motibeam
-
-# View logs
-sudo journalctl -u motibeam -f
-```
-
-### Interactive Controls
-
+### Education Vertical
 | Key | Action |
 |-----|--------|
-| `SPACE` | Next demo |
-| `1` | Medication Tracker demo |
-| `2` | Drill Mode demo |
-| `3` | Interactive Guide demo |
-| `ESC` | Exit application |
+| `1` | Math Word Problems |
+| `2` | Vocabulary Builder |
+| `3` | Sleep Mode (Ambient Learning) |
+| `SPACE` | Show Answer (Math mode) |
+| `N` | Next Problem (Math mode) |
+| `ESC` | Return to Main Menu |
 
-### Voice Commands
+### Smart Home Vertical
+| Key | Action |
+|-----|--------|
+| `1` | Family Dashboard |
+| `2` | Doorbell Monitor |
+| `3` | Package Tracker |
+| `4` | Smart Home Controls |
+| `5` | Family Messages |
+| `L` | Toggle Lights (in Controls) |
+| `D` | Lock/Unlock Door (in Controls) |
+| `G` | Open/Close Garage (in Controls) |
+| `+/-` | Adjust Thermostat (in Controls) |
+| `ESC` | Return to Main Menu |
 
-When voice control is enabled:
-- **"Medication taken"** - Confirms medication in Clinical demo
-- **"Medicine taken"** - Alternative confirmation phrase
-
-### Gesture Controls
-
-When gesture detection is enabled:
-- **Head Nod** - Confirms actions (vertical head movement)
-
-## 🏗️ Architecture
-
-### Project Structure
+## 🏗️ Project Structure
 
 ```
 MotiBeam-OS/
-├── motibeam_os.py       # Main application
-├── requirements.txt     # Python dependencies
-├── install_pi.sh        # Installation script
-├── motibeam.service     # Systemd service file
-├── README.md            # This file
-├── LICENSE              # License information
-└── .gitignore           # Git ignore rules
+├── motibeam_app.py           # Main unified application (START HERE)
+├── education_demo.py         # Education vertical (standalone/integrated)
+├── home_demo.py              # Smart home vertical (standalone/integrated)
+├── motibeam_os.py            # Original 3-demo system (legacy)
+├── requirements.txt          # Python dependencies
+├── install_pi.sh             # Installation script
+├── motibeam.service          # Systemd service file
+├── README.md                 # This file
+└── LICENSE                   # License information
 ```
 
-### Code Organization
+### Running Individual Demos
 
-```python
-# Hardware Integration Classes
-VoiceController()      # Speech recognition
-GestureDetector()      # Face/gesture detection
-CameraFeed()          # Real-time camera feed
-
-# UI Helper Functions
-draw_text()           # Enhanced text rendering
-draw_progress_bar()   # Progress indicators
-draw_status_indicator() # Color-coded status
-draw_motibeam_header() # Logo and branding
-
-# Demo Screens
-draw_medication_tracker_demo()
-draw_drill_mode_demo()
-draw_interactive_guide_demo()
-
-# Main Application
-MotiBeamOS()          # Application controller
-```
-
-## 🔧 Configuration
-
-### Display Settings
-
-Edit `/boot/config.txt` for custom display resolution:
-
-```ini
-# For GOODEE Pico Projector (1280x720)
-hdmi_group=2
-hdmi_mode=85
-hdmi_drive=2
-```
-
-### Audio Settings
-
-Edit `/etc/asound.conf` for custom audio configuration:
-
-```
-# Default microphone and speaker settings
-pcm.!default {
-    type asym
-    playback.pcm "dmix"
-    capture.pcm "dsnoop"
-}
-```
-
-### Camera Settings
-
-Test camera with:
-```bash
-v4l2-ctl --list-devices
-v4l2-ctl -d /dev/video0 --all
-```
-
-## 🧪 Testing
-
-### Test Individual Components
-
-```python
-# Test voice recognition
-python3 -c "import speech_recognition as sr; print('Voice: OK')"
-
-# Test OpenCV
-python3 -c "import cv2; print('OpenCV:', cv2.__version__)"
-
-# Test camera
-python3 -c "import cv2; cap = cv2.VideoCapture(0); print('Camera:', cap.isOpened())"
-
-# Test pygame
-python3 -c "import pygame; pygame.init(); print('Pygame: OK')"
-```
-
-### System Diagnostics
+Each vertical can run standalone for testing:
 
 ```bash
-# Check camera
-v4l2-ctl --list-devices
+# Education demo (standalone)
+python3 education_demo.py
 
-# Check microphone
-arecord -l
+# Smart home demo (standalone)
+python3 home_demo.py
 
-# Check display
-fbset
-
-# Check services
-systemctl status motibeam
+# Unified app (all verticals)
+python3 motibeam_app.py
 ```
+
+## 🎓 Education Vertical - Detailed Guide
+
+### Sleep Mode Features
+
+**Perfect for ambient learning while your child sleeps**
+
+- **Content Types**:
+  - Vocabulary words with definitions
+  - Math facts (division, multiplication, fractions)
+  - Science concepts
+  - Historical facts
+
+- **Display Pattern**:
+  1. Fade in (1 second)
+  2. Hold at full brightness (2 seconds)
+  3. Fade out (1 second)
+  4. Next item
+
+- **Pure Black Background**:
+  - No blue glow or TV look
+  - Wall appears alive with floating content
+  - Low light output for peaceful sleep
+
+### Math Word Problems
+
+**5th Grade Level Examples**:
+- Division word problems
+- Area and perimeter calculations
+- Fraction addition
+- Multi-step problem solving
+
+**Features**:
+- Full text wrapping (no cutoff)
+- Hint system
+- Show/hide answers
+- Multiple problems
+
+### Vocabulary Builder
+
+**Age-Appropriate Words**:
+- Science terms (Photosynthesis, Evaporation, Habitat)
+- Social studies (Democracy, Community)
+- Academic vocabulary
+
+**Features**:
+- Clear definitions
+- Proper text wrapping
+- Easy-to-read formatting
+
+## 🏠 Smart Home Vertical - Detailed Guide
+
+### Family Dashboard
+
+- Current time and date
+- Home status overview
+- Recent activity log
+- Quick status for all devices
+
+### Smart Controls
+
+**Controllable Devices**:
+- **Lights** - On/Off toggle
+- **Thermostat** - Temperature adjustment (60-85°F)
+- **Front Door** - Lock/Unlock status
+- **Garage** - Open/Closed status
+
+### Package Tracker
+
+- Delivery status
+- Expected arrival times
+- Multiple package tracking
+- Color-coded status (Delivered=Green, Transit=Yellow)
+
+### Family Messages
+
+- Message board for family
+- Sender and timestamp
+- Important reminders
+- Quick communication
+
+## 🔧 Technical Details
+
+### Architecture
+
+```python
+# Main Application (motibeam_app.py)
+class MotiBeamOS:
+    - Boot screen with animation
+    - Main menu navigation
+    - Vertical launcher
+    - Shared screen management
+    - Proper cleanup on exit
+
+# Education Demo (education_demo.py)
+class EducationDemo:
+    - Math, Vocab, Sleep modes
+    - Text wrapping engine
+    - Fade animations
+    - Event handling
+
+# Home Demo (home_demo.py)
+class HomeDemo:
+    - 5 sub-features
+    - Interactive controls
+    - State management
+    - Real-time updates
+```
+
+### Design Principles
+
+1. **Pure Black Background** - Wall looks alive, not like TV
+2. **Fullscreen Always** - Immersive projection experience
+3. **Proper ESC Handling** - No frozen screens
+4. **Text Wrapping** - Content never cuts off
+5. **ASCII Over Emoji** - Reliable rendering
+6. **Standalone & Integrated** - Each vertical works alone or together
 
 ## 🐛 Troubleshooting
 
-### Camera Not Detected
+### ESC Key Freezes
+**Fixed in current version** - ESC now properly clears screen before exit
 
-```bash
-# Check camera connection
-lsusb | grep -i camera
+### Emoji Shows as Boxes
+**Fixed in current version** - Using ASCII symbols like [VOCAB], [DIV], [MULT]
 
-# Test camera
-v4l2-ctl --list-devices
+### Questions Cut Off
+**Fixed in current version** - Proper text wrapping implemented
 
-# Add user to video group
-sudo usermod -a -G video $USER
-```
+### Blue Background Looks Like TV
+**Fixed in current version** - Pure black background (0, 0, 0)
 
-### Microphone Not Working
-
-```bash
-# List audio devices
-arecord -l
-
-# Test microphone
-arecord -d 5 test.wav
-aplay test.wav
-
-# Add user to audio group
-sudo usermod -a -G audio $USER
-```
-
-### Display Issues
-
-```bash
-# Check HDMI status
-tvservice -s
-
-# Test display modes
-tvservice -m CEA
-tvservice -m DMT
-```
-
-### Service Won't Start
-
-```bash
-# Check service logs
-sudo journalctl -u motibeam -n 50
-
-# Check permissions
-ls -la /home/motibeam/motibeam-os/
-
-# Test manual run
-cd /home/motibeam/motibeam-os
-source venv/bin/activate
-python motibeam_os.py
-```
+### Not Fullscreen
+**Fixed in current version** - pygame.FULLSCREEN flag enabled
 
 ## 📚 Dependencies
 
-### System Packages
-- Python 3.11+
-- SDL2 (graphics)
-- PortAudio (audio)
-- OpenCV (computer vision)
-- V4L2 (video for Linux)
-- ALSA (audio)
+### Required
+- **Python 3.11+**
+- **pygame 2.6+** - Graphics and display
 
-### Python Packages
-- **pygame 2.5.2** - Graphics and display
-- **opencv-python 4.8.1** - Computer vision
-- **numpy 1.24.3** - Array operations
-- **SpeechRecognition 3.10.0** - Voice recognition
-- **PyAudio 0.2.14** - Audio interface
+### Optional
+- **opencv-python** - Camera feed (future features)
+- **SpeechRecognition** - Voice control (future features)
+- **PyAudio** - Audio interface (future features)
 
-See `requirements.txt` for complete list.
+### Install Minimal Setup
+```bash
+pip install pygame
+```
 
-## 🤝 Contributing
+### Install Full Setup
+```bash
+pip install pygame opencv-python SpeechRecognition PyAudio numpy
+```
 
-Contributions are welcome! Please feel free to submit issues and pull requests.
+## 🚀 Deployment
 
-### Development Setup
+### Auto-Start on Boot
 
 ```bash
-# Clone the repository
-git clone https://github.com/quamie25/MotiBeam-OS.git
-cd MotiBeam-OS
+# Copy service file
+sudo cp motibeam.service /etc/systemd/system/
 
-# Create development environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+# Enable service
+sudo systemctl enable motibeam
 
-# Run in development mode
-python motibeam_os.py
+# Start service
+sudo systemctl start motibeam
+
+# Check status
+sudo systemctl status motibeam
 ```
+
+### Manual Start
+
+```bash
+# Activate environment
+source motibeam-env/bin/activate
+
+# Run application
+python3 motibeam_app.py
+```
+
+## 🗺️ Roadmap
+
+### Current Version (v3.0)
+- ✅ Unified multi-vertical platform
+- ✅ Education vertical (5th grade learning)
+- ✅ Smart home vertical (family control)
+- ✅ Pure black background design
+- ✅ Proper ESC handling throughout
+- ✅ Text wrapping and ASCII symbols
+- ✅ Fullscreen projection mode
+
+### Next Updates
+- 🔄 Clinical care vertical (medication tracking)
+- 🔄 Automotive vertical (maintenance assistance)
+- 🔄 Emergency response vertical
+- 🔄 Industrial vertical (safety procedures)
+- 🔄 Security vertical (monitoring)
+- 🔄 Voice control integration
+- 🔄 Camera/gesture detection
+
+### Future Enhancements
+- 🔄 Cloud sync for content
+- 🔄 Multi-user profiles
+- 🔄 Content customization
+- 🔄 Mobile app control
+- 🔄 AI-powered learning adaptation
+
+## 👨‍👩‍👧‍👦 Use Cases
+
+### For Veterans with Memory Decline
+- Visual medication reminders
+- Step-by-step task guidance
+- Clear, simple interfaces
+- Ambient information display
+
+### For K-12 Students
+- Interactive homework help
+- Sleep learning mode
+- Vocabulary building
+- Math practice
+
+### For Families
+- Shared calendar and messages
+- Home automation control
+- Package tracking
+- Doorbell monitoring
+
+## 💡 Philosophy
+
+**"Make the wall look alive, not like a TV"**
+
+MotiBeam OS uses pure black backgrounds so content appears to float on the wall naturally. No blue glow, no rectangles, no TV-in-a-box look. Just information appearing and disappearing as needed, making your wall an ambient, living surface.
+
+## 📞 Support
+
+- **GitHub Issues**: https://github.com/quamie25/MotiBeam-OS/issues
+- **Documentation**: This README
+- **Quick Reference**: See controls section above
 
 ## 📄 License
 
@@ -360,34 +409,15 @@ This project is licensed under the terms included in the LICENSE file.
 
 ## 🙏 Acknowledgments
 
-- OpenCV team for computer vision libraries
-- Pygame community for graphics framework
-- CMU Sphinx team for speech recognition
+Built for veterans, students, and families who need ambient computing that feels natural and accessible.
+
+Special thanks to:
+- Pygame community
 - Raspberry Pi Foundation
-
-## 📞 Support
-
-For issues, questions, or contributions:
-- **GitHub Issues**: https://github.com/quamie25/MotiBeam-OS/issues
-- **Documentation**: This README
-
-## 🗺️ Roadmap
-
-### Current Version (v2.0)
-- ✅ Voice control integration
-- ✅ Gesture detection
-- ✅ Real-time camera feed
-- ✅ Professional UI
-- ✅ Production deployment
-
-### Future Enhancements
-- 🔄 Multi-language support
-- 🔄 Custom demo builder
-- 🔄 Remote configuration
-- 🔄 Cloud sync for settings
-- 🔄 Advanced gesture recognition (MediaPipe)
-- 🔄 AI-powered assistance
+- Open source contributors
 
 ---
 
-**Made with ❤️ for accessible technology**
+**Made with ❤️ for accessible ambient computing**
+
+**Current Status**: Education & Smart Home verticals fully operational • Pure black "wall looks alive" design • Ready for 5th grade learning 🎓
