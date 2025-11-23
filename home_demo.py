@@ -340,7 +340,9 @@ class HomeDemo:
                 # ESC key handling - proper state management
                 if event.key == pygame.K_ESCAPE:
                     if self.current_screen == "menu":
-                        # Exit application
+                        # Exit application - clear screen first to avoid freeze
+                        self.screen.fill((0, 0, 0))
+                        pygame.display.flip()
                         self.running = False
                         return False
                     else:
