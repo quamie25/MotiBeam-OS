@@ -1,51 +1,20 @@
 [Unit]
-Description=MotiBeam OS - Advanced Projection-Based Assistive Technology System
+Description=MotiBeam OS - Multi-Vertical Ambient Computing Platform
 Documentation=https://github.com/quamie25/MotiBeam-OS
-After=network.target sound.target graphical.target
-Wants=network.target sound.target
+After=graphical.target
 
 [Service]
 Type=simple
 User=motibeam
-Group=motibeam
 WorkingDirectory=/home/motibeam/MotiBeam-OS
-
-# Environment variables
 Environment="DISPLAY=:0"
-Environment="XAUTHORITY=/home/motibeam/.Xauthority"
-Environment="PULSE_SERVER=/run/user/1000/pulse/native"
-Environment="XDG_RUNTIME_DIR=/run/user/1000"
-
-# Execution
-ExecStart=/home/motibeam/MotiBeam-OS/motibeam-env/bin/python /home/motibeam/MotiBeam-OS/motibeam_app.py
-
-# Restart policy
+ExecStart=/bin/bash -c 'cd /home/motibeam/MotiBeam-OS && source motibeam-env/bin/activate && python3 motibeam_app.py'
 Restart=on-failure
 RestartSec=10
-StartLimitInterval=200
-StartLimitBurst=5
-
-# Resource limits
-Nice=-5
-CPUQuota=80%
-MemoryLimit=512M
 
 # Logging
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=motibeam
-
-# Security hardening
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=read-only
-ReadWritePaths=/home/motibeam/MotiBeam-OS
-
-# Device access (required for camera and microphone)
-DeviceAllow=/dev/video0 rw
-DeviceAllow=/dev/snd rw
-SupplementaryGroups=video audio
 
 [Install]
 WantedBy=graphical.target
