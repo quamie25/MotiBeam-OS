@@ -39,7 +39,7 @@ class HomeDemo:
 
         if standalone:
             pygame.init()
-            self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+            self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT), pygame.FULLSCREEN)
             pygame.display.set_caption("MotiBeam OS - Smart Home")
         else:
             self.screen = screen
