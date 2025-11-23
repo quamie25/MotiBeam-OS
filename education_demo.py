@@ -17,7 +17,7 @@ FPS = 30
 
 # Color palette
 COLORS = {
-    'bg': (15, 20, 35),
+    'bg': (0, 0, 0),  # Pure black - wall looks alive, not like TV
     'accent': (0, 255, 180),
     'text': (240, 245, 255),
     'warning': (255, 180, 0),
