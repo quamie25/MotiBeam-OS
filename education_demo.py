@@ -70,9 +70,9 @@ class EducationDemo:
         self.current_math_problem = None
         self.show_math_answer = False
 
-        # Fonts
-        self.font_small = pygame.font.Font(None, 32)
-        self.font_medium = pygame.font.Font(None, 48)
+        # Fonts - Larger for projection readability
+        self.font_small = pygame.font.Font(None, 48)
+        self.font_medium = pygame.font.Font(None, 56)
         self.font_large = pygame.font.Font(None, 64)
         self.font_huge = pygame.font.Font(None, 96)
 
@@ -162,24 +162,29 @@ class EducationDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header()
 
-        # Title
+        # Title - positioned in upper third
         self.draw_text("5TH GRADE LEARNING CENTER",
-                      (DISPLAY_WIDTH // 2, 150), self.font_large, COLORS['accent'], align='center')
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 4), self.font_large, COLORS['accent'], align='center')
 
-        # Menu options
+        # Menu options - centered vertically in middle 50% of screen
         options = [
             "1 - Math Word Problems",
             "2 - Vocabulary Builder",
             "3 - Sleep Mode (Ambient Learning)",
         ]
 
-        y_pos = 300
+        num_options = len(options)
+        option_spacing = 75
+        total_options_height = num_options * option_spacing
+        y_start = (DISPLAY_HEIGHT - total_options_height) // 2 + 30
+
+        y_pos = y_start
         for option in options:
             self.draw_text(option, (DISPLAY_WIDTH // 2, y_pos),
                           self.font_medium, COLORS['text'], align='center')
-            y_pos += 70
+            y_pos += option_spacing
 
-        # Instructions
+        # Instructions - bottom of screen
         self.draw_text("Press number key to select",
                       (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 100),
                       self.font_small, COLORS['muted'], align='center')
@@ -192,42 +197,42 @@ class EducationDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header()
 
-        # Title
+        # Title - positioned in upper area
         self.draw_text("MATH WORD PROBLEMS",
-                      (DISPLAY_WIDTH // 2, 120), self.font_large, COLORS['success'], align='center')
+                      (DISPLAY_WIDTH // 2, 130), self.font_large, COLORS['success'], align='center')
 
         # Select random problem if none selected
         if self.current_math_problem is None:
             self.current_math_problem = random.choice(self.math_problems)
             self.show_math_answer = False
 
-        # Draw question with proper wrapping
-        question_y = 200
-        self.draw_text("Question:", (100, question_y), self.font_medium, COLORS['accent'])
+        # Draw question with proper wrapping - centered in middle area
+        question_y = 220
+        self.draw_text("Question:", (DISPLAY_WIDTH // 2, question_y), self.font_medium, COLORS['accent'], align='center')
 
         # Wrap the question text
-        max_width = DISPLAY_WIDTH - 200  # Leave margins
+        max_width = DISPLAY_WIDTH - 300  # Leave margins
         wrapped_lines = self.wrap_text(self.current_math_problem["question"], self.font_small, max_width)
 
-        line_y = question_y + 50
+        line_y = question_y + 60
         for line in wrapped_lines:
-            self.draw_text(line, (100, line_y), self.font_small, COLORS['text'])
-            line_y += 40
+            self.draw_text(line, (DISPLAY_WIDTH // 2, line_y), self.font_small, COLORS['text'], align='center')
+            line_y += 50
 
         # Hint
-        hint_y = line_y + 30
+        hint_y = line_y + 40
         self.draw_text("Hint: " + self.current_math_problem["hint"],
-                      (100, hint_y), self.font_small, COLORS['warning'])
+                      (DISPLAY_WIDTH // 2, hint_y), self.font_small, COLORS['warning'], align='center')
 
         # Answer (shown when SPACE is pressed)
-        answer_y = hint_y + 80
+        answer_y = hint_y + 90
         if self.show_math_answer:
-            self.draw_text("Answer:", (100, answer_y), self.font_medium, COLORS['success'])
+            self.draw_text("Answer:", (DISPLAY_WIDTH // 2, answer_y), self.font_medium, COLORS['success'], align='center')
             self.draw_text(self.current_math_problem["answer"],
-                          (100, answer_y + 50), self.font_medium, COLORS['success'])
+                          (DISPLAY_WIDTH // 2, answer_y + 60), self.font_medium, COLORS['success'], align='center')
         else:
             self.draw_text("Press SPACE to see answer",
-                          (100, answer_y), self.font_small, COLORS['muted'])
+                          (DISPLAY_WIDTH // 2, answer_y), self.font_small, COLORS['muted'], align='center')
 
         # Controls
         self.draw_text("SPACE - Show Answer  |  N - Next Problem  |  ESC - Menu",
@@ -239,26 +244,26 @@ class EducationDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header()
 
-        # Title
+        # Title - positioned in upper area
         self.draw_text("VOCABULARY BUILDER",
-                      (DISPLAY_WIDTH // 2, 120), self.font_large, COLORS['accent'], align='center')
+                      (DISPLAY_WIDTH // 2, 130), self.font_large, COLORS['accent'], align='center')
 
-        # Display all vocabulary words
-        y_pos = 220
+        # Display all vocabulary words - centered vertically
+        y_pos = 240
         for vocab in self.vocab_words:
-            # Word
-            self.draw_text(vocab["word"], (100, y_pos), self.font_medium, COLORS['success'])
+            # Word - centered
+            self.draw_text(vocab["word"], (DISPLAY_WIDTH // 2, y_pos), self.font_medium, COLORS['success'], align='center')
 
-            # Definition with wrapping
-            max_width = DISPLAY_WIDTH - 200
+            # Definition with wrapping - centered
+            max_width = DISPLAY_WIDTH - 300
             wrapped_def = self.wrap_text(vocab["definition"], self.font_small, max_width)
 
-            def_y = y_pos + 45
+            def_y = y_pos + 55
             for line in wrapped_def:
-                self.draw_text(line, (120, def_y), self.font_small, COLORS['text'])
-                def_y += 35
+                self.draw_text(line, (DISPLAY_WIDTH // 2, def_y), self.font_small, COLORS['text'], align='center')
+                def_y += 45
 
-            y_pos = def_y + 25
+            y_pos = def_y + 35
 
         # Controls
         self.draw_text("ESC - Return to Menu",

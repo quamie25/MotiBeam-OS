@@ -50,10 +50,10 @@ class HomeDemo:
         # Current screen state
         self.current_screen = "menu"  # menu, dashboard, doorbell, packages, controls, messages
 
-        # Fonts
-        self.font_small = pygame.font.Font(None, 28)
-        self.font_medium = pygame.font.Font(None, 48)
-        self.font_large = pygame.font.Font(None, 64)
+        # Fonts - Larger for projection readability
+        self.font_small = pygame.font.Font(None, 48)
+        self.font_medium = pygame.font.Font(None, 56)
+        self.font_large = pygame.font.Font(None, 72)
 
         # Smart home state
         self.lights_on = True
@@ -124,7 +124,7 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("SMART HOME CONTROL")
 
-        # Menu options
+        # Menu options - centered vertically in middle 50% of screen
         options = [
             ("1", "Family Dashboard", COLORS['accent']),
             ("2", "Doorbell Monitor", COLORS['success']),
@@ -133,19 +133,24 @@ class HomeDemo:
             ("5", "Family Messages", COLORS['success']),
         ]
 
-        y_pos = 200
+        num_options = len(options)
+        option_spacing = 75
+        total_options_height = num_options * option_spacing
+        y_start = (DISPLAY_HEIGHT - total_options_height) // 2 + 20
+
+        y_pos = y_start
         for key, label, color in options:
             text = f"{key} - {label}"
             self.draw_text(text, (DISPLAY_WIDTH // 2, y_pos),
                           self.font_medium, color, align='center')
-            y_pos += 80
+            y_pos += option_spacing
 
         # Instructions
         self.draw_text("Press number key to select",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 80),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 90),
                       self.font_small, COLORS['muted'], align='center')
         self.draw_text("ESC - Exit",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 45),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_dashboard(self):
@@ -153,19 +158,20 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("FAMILY DASHBOARD")
 
-        # Time and date
+        # Time and date - centered in upper area
         now = datetime.now()
         self.draw_text(now.strftime("%A, %B %d, %Y"),
-                      (DISPLAY_WIDTH // 2, 140), self.font_medium, COLORS['text'], align='center')
+                      (DISPLAY_WIDTH // 2, 150), self.font_medium, COLORS['text'], align='center')
         self.draw_text(now.strftime("%I:%M %p"),
-                      (DISPLAY_WIDTH // 2, 190), self.font_large, COLORS['accent'], align='center')
+                      (DISPLAY_WIDTH // 2, 210), self.font_large, COLORS['accent'], align='center')
 
-        # Quick status grid
-        y_base = 280
-        col_width = DISPLAY_WIDTH // 2
+        # Quick status grid - balanced around center
+        center_x = DISPLAY_WIDTH // 2
+        y_base = 300
 
-        # Left column
-        self.draw_text("HOME STATUS", (50, y_base), self.font_medium, COLORS['accent'])
+        # Left column - offset from center
+        left_col_x = center_x - 320
+        self.draw_text("HOME STATUS", (left_col_x, y_base), self.font_medium, COLORS['accent'])
         status_items = [
             ("Lights", "ON" if self.lights_on else "OFF", COLORS['success'] if self.lights_on else COLORS['muted']),
             ("Thermostat", f"{self.thermostat_temp}F", COLORS['success']),
@@ -173,14 +179,15 @@ class HomeDemo:
             ("Garage", "CLOSED" if self.garage_closed else "OPEN", COLORS['success'] if self.garage_closed else COLORS['warning']),
         ]
 
-        item_y = y_base + 50
+        item_y = y_base + 60
         for label, value, color in status_items:
-            self.draw_text(f"{label}:", (70, item_y), self.font_small, COLORS['text'])
-            self.draw_text(value, (300, item_y), self.font_small, color)
-            item_y += 45
+            self.draw_text(f"{label}:", (left_col_x, item_y), self.font_small, COLORS['text'])
+            self.draw_text(value, (left_col_x + 220, item_y), self.font_small, color)
+            item_y += 55
 
-        # Right column - Recent activity
-        self.draw_text("RECENT ACTIVITY", (col_width + 50, y_base), self.font_medium, COLORS['accent'])
+        # Right column - offset from center
+        right_col_x = center_x + 40
+        self.draw_text("RECENT ACTIVITY", (right_col_x, y_base), self.font_medium, COLORS['accent'])
         activities = [
             "Package delivered - 2:30 PM",
             "Front door unlocked - 3:45 PM",
@@ -188,14 +195,14 @@ class HomeDemo:
             "New message from Mom - 3:15 PM",
         ]
 
-        activity_y = y_base + 50
+        activity_y = y_base + 60
         for activity in activities:
-            self.draw_text(activity, (col_width + 70, activity_y), self.font_small, COLORS['text'])
-            activity_y += 45
+            self.draw_text(activity, (right_col_x, activity_y), self.font_small, COLORS['text'])
+            activity_y += 55
 
         # Bottom instruction
         self.draw_text("ESC - Return to Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_doorbell(self):
@@ -203,27 +210,31 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("DOORBELL MONITOR")
 
-        # Camera feed placeholder
-        camera_rect = pygame.Rect(240, 180, 800, 450)
+        # Camera feed placeholder - centered in middle of screen
+        camera_width = 800
+        camera_height = 420
+        camera_x = (DISPLAY_WIDTH - camera_width) // 2
+        camera_y = (DISPLAY_HEIGHT - camera_height) // 2 - 20
+        camera_rect = pygame.Rect(camera_x, camera_y, camera_width, camera_height)
         pygame.draw.rect(self.screen, (50, 50, 50), camera_rect, border_radius=15)
         pygame.draw.rect(self.screen, COLORS['accent'], camera_rect, 3, border_radius=15)
 
         self.draw_text("FRONT DOOR CAMERA",
-                      (DISPLAY_WIDTH // 2, 250), self.font_large, COLORS['muted'], align='center')
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2 - 80), self.font_large, COLORS['muted'], align='center')
         self.draw_text("No activity detected",
-                      (DISPLAY_WIDTH // 2, 350), self.font_medium, COLORS['muted'], align='center')
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2 + 20), self.font_medium, COLORS['muted'], align='center')
 
         # Status indicator
-        self.draw_text("LIVE", (280, 200), self.font_small, COLORS['success'])
-        pygame.draw.circle(self.screen, COLORS['success'], (260, 207), 8)
+        self.draw_text("LIVE", (camera_x + 50, camera_y + 30), self.font_small, COLORS['success'])
+        pygame.draw.circle(self.screen, COLORS['success'], (camera_x + 25, camera_y + 37), 10)
 
         # Recent visitors
         self.draw_text("Recent Visitors: None today",
-                      (DISPLAY_WIDTH // 2, 560), self.font_small, COLORS['text'], align='center')
+                      (DISPLAY_WIDTH // 2, camera_y + camera_height + 40), self.font_small, COLORS['text'], align='center')
 
         # Bottom instruction
         self.draw_text("ESC - Return to Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_packages(self):
@@ -231,11 +242,17 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("PACKAGE TRACKER")
 
-        # Package list
-        y_pos = 180
+        # Package list - centered vertically
+        num_packages = len(self.packages)
+        box_height = 130
+        box_spacing = 30
+        total_height = (num_packages * box_height) + ((num_packages - 1) * box_spacing)
+        y_start = (DISPLAY_HEIGHT - total_height) // 2 + 30
+
+        y_pos = y_start
         for i, package in enumerate(self.packages):
             # Package box
-            box_rect = pygame.Rect(100, y_pos, DISPLAY_WIDTH - 200, 120)
+            box_rect = pygame.Rect(140, y_pos, DISPLAY_WIDTH - 280, box_height)
 
             if package["status"] == "Delivered":
                 border_color = COLORS['success']
@@ -248,16 +265,16 @@ class HomeDemo:
             pygame.draw.rect(self.screen, border_color, box_rect, 3, border_radius=10)
 
             # Package info
-            self.draw_text(package["name"], (130, y_pos + 20), self.font_medium, COLORS['text'])
-            self.draw_text(f"Status: {package['status']}", (130, y_pos + 60), self.font_small, border_color)
-            self.draw_text(package["time"], (DISPLAY_WIDTH - 130, y_pos + 40),
+            self.draw_text(package["name"], (170, y_pos + 25), self.font_medium, COLORS['text'])
+            self.draw_text(f"Status: {package['status']}", (170, y_pos + 70), self.font_small, border_color)
+            self.draw_text(package["time"], (DISPLAY_WIDTH - 170, y_pos + 50),
                           self.font_small, COLORS['muted'], align='right')
 
-            y_pos += 150
+            y_pos += box_height + box_spacing
 
         # Bottom instruction
         self.draw_text("ESC - Return to Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_controls(self):
@@ -265,42 +282,43 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("SMART HOME CONTROLS")
 
-        # Control grid
-        controls_y = 180
-        col1_x = 150
-        col2_x = DISPLAY_WIDTH // 2 + 100
+        # Control grid - balanced around center
+        center_x = DISPLAY_WIDTH // 2
+        controls_y_start = 220
+        col1_x = center_x - 360
+        col2_x = center_x + 80
 
         # Lights control
-        self.draw_text("LIGHTS", (col1_x, controls_y), self.font_medium, COLORS['accent'])
+        self.draw_text("LIGHTS", (col1_x, controls_y_start), self.font_medium, COLORS['accent'])
         light_status = "ON" if self.lights_on else "OFF"
         light_color = COLORS['success'] if self.lights_on else COLORS['muted']
-        self.draw_text(f"Status: {light_status}", (col1_x, controls_y + 50), self.font_small, light_color)
-        self.draw_text("Press L to toggle", (col1_x, controls_y + 85), self.font_small, COLORS['muted'])
+        self.draw_text(f"Status: {light_status}", (col1_x, controls_y_start + 55), self.font_small, light_color)
+        self.draw_text("Press L to toggle", (col1_x, controls_y_start + 95), self.font_small, COLORS['muted'])
 
         # Thermostat control
-        self.draw_text("THERMOSTAT", (col2_x, controls_y), self.font_medium, COLORS['accent'])
-        self.draw_text(f"Temperature: {self.thermostat_temp}F", (col2_x, controls_y + 50),
+        self.draw_text("THERMOSTAT", (col2_x, controls_y_start), self.font_medium, COLORS['accent'])
+        self.draw_text(f"Temperature: {self.thermostat_temp}F", (col2_x, controls_y_start + 55),
                       self.font_small, COLORS['success'])
-        self.draw_text("Press +/- to adjust", (col2_x, controls_y + 85), self.font_small, COLORS['muted'])
+        self.draw_text("Press +/- to adjust", (col2_x, controls_y_start + 95), self.font_small, COLORS['muted'])
 
         # Door lock control
-        controls_y += 180
-        self.draw_text("FRONT DOOR", (col1_x, controls_y), self.font_medium, COLORS['accent'])
+        controls_y2 = controls_y_start + 200
+        self.draw_text("FRONT DOOR", (col1_x, controls_y2), self.font_medium, COLORS['accent'])
         door_status = "LOCKED" if self.door_locked else "UNLOCKED"
         door_color = COLORS['success'] if self.door_locked else COLORS['error']
-        self.draw_text(f"Status: {door_status}", (col1_x, controls_y + 50), self.font_small, door_color)
-        self.draw_text("Press D to toggle", (col1_x, controls_y + 85), self.font_small, COLORS['muted'])
+        self.draw_text(f"Status: {door_status}", (col1_x, controls_y2 + 55), self.font_small, door_color)
+        self.draw_text("Press D to toggle", (col1_x, controls_y2 + 95), self.font_small, COLORS['muted'])
 
         # Garage control
-        self.draw_text("GARAGE", (col2_x, controls_y), self.font_medium, COLORS['accent'])
+        self.draw_text("GARAGE", (col2_x, controls_y2), self.font_medium, COLORS['accent'])
         garage_status = "CLOSED" if self.garage_closed else "OPEN"
         garage_color = COLORS['success'] if self.garage_closed else COLORS['warning']
-        self.draw_text(f"Status: {garage_status}", (col2_x, controls_y + 50), self.font_small, garage_color)
-        self.draw_text("Press G to toggle", (col2_x, controls_y + 85), self.font_small, COLORS['muted'])
+        self.draw_text(f"Status: {garage_status}", (col2_x, controls_y2 + 55), self.font_small, garage_color)
+        self.draw_text("Press G to toggle", (col2_x, controls_y2 + 95), self.font_small, COLORS['muted'])
 
         # Bottom instructions
         self.draw_text("L=Lights | D=Door | G=Garage | +/-=Temp | ESC=Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_messages(self):
@@ -308,25 +326,31 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("FAMILY MESSAGES")
 
-        # Message list
-        y_pos = 180
+        # Message list - centered vertically
+        num_messages = len(self.messages)
+        msg_height = 120
+        msg_spacing = 30
+        total_height = (num_messages * msg_height) + ((num_messages - 1) * msg_spacing)
+        y_start = (DISPLAY_HEIGHT - total_height) // 2 + 40
+
+        y_pos = y_start
         for message in self.messages:
             # Message box
-            msg_rect = pygame.Rect(100, y_pos, DISPLAY_WIDTH - 200, 100)
+            msg_rect = pygame.Rect(140, y_pos, DISPLAY_WIDTH - 280, msg_height)
             pygame.draw.rect(self.screen, (30, 35, 50), msg_rect, border_radius=10)
             pygame.draw.rect(self.screen, COLORS['accent'], msg_rect, 2, border_radius=10)
 
             # Message content
-            self.draw_text(f"From: {message['from']}", (130, y_pos + 15), self.font_medium, COLORS['success'])
-            self.draw_text(message['text'], (130, y_pos + 50), self.font_small, COLORS['text'])
-            self.draw_text(message['time'], (DISPLAY_WIDTH - 130, y_pos + 35),
+            self.draw_text(f"From: {message['from']}", (170, y_pos + 20), self.font_medium, COLORS['success'])
+            self.draw_text(message['text'], (170, y_pos + 65), self.font_small, COLORS['text'])
+            self.draw_text(message['time'], (DISPLAY_WIDTH - 170, y_pos + 45),
                           self.font_small, COLORS['muted'], align='right')
 
-            y_pos += 130
+            y_pos += msg_height + msg_spacing
 
         # Bottom instruction
         self.draw_text("ESC - Return to Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def handle_events(self):

@@ -2,6 +2,7 @@
 """
 MotiBeam OS v4.0 - Multi-Vertical Ambient Computing Platform
 All 7 verticals implemented with cinematic visual style
+VISUAL LAYOUT OPTIMIZED FOR PROJECTION
 """
 
 import pygame
@@ -56,12 +57,12 @@ class MotiBeamOS:
         self.boot_start_time = pygame.time.get_ticks()
         self.boot_duration = 2000  # 2 seconds
 
-        # Fonts - Large for projection
-        self.font_tiny = pygame.font.Font(None, 28)
-        self.font_small = pygame.font.Font(None, 36)
-        self.font_medium = pygame.font.Font(None, 56)
-        self.font_large = pygame.font.Font(None, 72)
-        self.font_huge = pygame.font.Font(None, 110)
+        # Fonts - Larger for projection, better readability
+        self.font_tiny = pygame.font.Font(None, 36)
+        self.font_small = pygame.font.Font(None, 48)
+        self.font_medium = pygame.font.Font(None, 72)
+        self.font_large = pygame.font.Font(None, 96)
+        self.font_huge = pygame.font.Font(None, 140)
 
         # Menu selection
         self.menu_index = 0
@@ -126,16 +127,16 @@ class MotiBeamOS:
         elapsed = pygame.time.get_ticks() - self.boot_start_time
         self.boot_progress = min(1.0, elapsed / self.boot_duration)
 
-        # MotiBeam logo
+        # MotiBeam logo - centered
         self.draw_text("MotiBeam OS", (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2 - 100),
                       self.font_huge, COLORS['accent'], align='center')
 
-        # Version
+        # Version - centered below logo
         self.draw_text("v4.0 • Ambient Projection Hub",
                       (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2),
                       self.font_medium, COLORS['text'], align='center')
 
-        # Progress bar
+        # Progress bar - centered
         bar_width = 600
         bar_height = 20
         bar_x = (DISPLAY_WIDTH - bar_width) // 2
@@ -153,69 +154,76 @@ class MotiBeamOS:
         self.draw_text(loading_text, (DISPLAY_WIDTH // 2, bar_y + 50),
                       self.font_small, COLORS['muted'], align='center')
 
-        # Check if boot complete
         if self.boot_progress >= 1.0:
             self.current_screen = "menu"
 
     def render_menu(self):
-        """Render main menu - v4 style"""
+        """Render main menu - v4 style, better centered"""
         self.screen.fill(COLORS['bg'])
 
-        # Header
-        self.draw_text("MotiBeam OS", (DISPLAY_WIDTH // 2, 60),
+        # Header - top area
+        self.draw_text("MotiBeam OS", (DISPLAY_WIDTH // 2, 70),
                       self.font_huge, COLORS['accent'], align='center')
 
         # Subtitle
         self.draw_text("Ambient Projection Hub • Select a vertical to demo",
-                      (DISPLAY_WIDTH // 2, 140),
+                      (DISPLAY_WIDTH // 2, 160),
                       self.font_small, COLORS['muted'], align='center')
 
-        # Menu items
-        y_start = 220
-        y_spacing = 70
+        # Menu items - centered in middle 50% of screen
+        # Calculate total height needed for all items
+        num_items = len(self.menu_items)
+        y_spacing = 65
+        total_menu_height = num_items * y_spacing
+
+        # Start position: center the block vertically
+        y_start = (DISPLAY_HEIGHT - total_menu_height) // 2 + 30
 
         for i, (key, name, desc) in enumerate(self.menu_items):
             y_pos = y_start + (i * y_spacing)
 
             # Highlight selected item
             if i == self.menu_index:
-                highlight_rect = pygame.Rect(200, y_pos - 10, DISPLAY_WIDTH - 400, 65)
+                highlight_rect = pygame.Rect(240, y_pos - 12, DISPLAY_WIDTH - 480, 60)
                 self.draw_panel(highlight_rect, COLORS['accent'], border_width=3)
                 name_color = COLORS['accent']
             else:
                 name_color = COLORS['text']
 
-            # Key number and name
+            # Key number and name - centered
             key_num = str(i + 1)
             full_text = f"{key_num} - {name}"
             self.draw_text(full_text, (DISPLAY_WIDTH // 2, y_pos),
                           self.font_medium, name_color, align='center')
 
-            # Description
-            self.draw_text(desc, (DISPLAY_WIDTH // 2, y_pos + 38),
-                          self.font_small, COLORS['muted'], align='center')
+            # Description - centered below, smaller
+            self.draw_text(desc, (DISPLAY_WIDTH // 2, y_pos + 35),
+                          self.font_tiny, COLORS['muted'], align='center')
 
-        # Controls
+        # Controls - bottom
         self.draw_text("↑/↓ or W/S: Navigate  |  1-7: Jump  |  ENTER: Select  |  ESC: Exit",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_clinical(self):
-        """Clinical Care - Medication + Guardian Mode"""
+        """Clinical Care - Medication + Guardian Mode - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
-        # Header
-        self.draw_text("Clinical Care", (DISPLAY_WIDTH // 2, 60),
+        # Header - centered at top
+        self.draw_text("Clinical Care", (DISPLAY_WIDTH // 2, 70),
                       self.font_large, COLORS['clinical'], align='center')
         self.draw_text("Veteran Support • Medication & Guardian Mode",
-                      (DISPLAY_WIDTH // 2, 120),
+                      (DISPLAY_WIDTH // 2, 140),
                       self.font_small, COLORS['muted'], align='center')
 
-        # Left panel - Medication schedule
-        left_x = 100
-        med_y = 180
+        # Two-column layout, balanced around center
+        center_x = DISPLAY_WIDTH // 2
+        left_col_x = center_x - 300
+        right_col_x = center_x + 50
 
-        self.draw_text("Today's Medication Schedule:", (left_x, med_y),
+        # Left panel - Medication schedule
+        med_y = 200
+        self.draw_text("Today's Medication Schedule:", (left_col_x, med_y),
                       self.font_medium, COLORS['text'])
 
         med_y += 60
@@ -231,68 +239,68 @@ class MotiBeamOS:
                 status_label = "[PLAN] "
 
             med_text = f"{med['time']}  {status_label} {med['name']}"
-            self.draw_text(med_text, (left_x + 20, med_y),
+            self.draw_text(med_text, (left_col_x, med_y),
                           self.font_small, status_color)
             med_y += 45
 
-        # Right panel - Guardian Mode
-        guard_x = DISPLAY_WIDTH // 2 + 50
-        guard_y = 180
-
-        guard_rect = pygame.Rect(guard_x - 20, guard_y - 20, 520, 380)
+        # Right panel - Guardian Mode - centered in right column
+        guard_y = 200
+        guard_rect = pygame.Rect(right_col_x - 20, guard_y - 20, 520, 380)
         self.draw_panel(guard_rect, COLORS['clinical'], border_width=3)
 
-        self.draw_text("[GUARDIAN MODE]", (guard_x, guard_y),
-                      self.font_medium, COLORS['clinical'])
+        self.draw_text("[GUARDIAN MODE]", (right_col_x + 240, guard_y),
+                      self.font_medium, COLORS['clinical'], align='center')
 
         guard_y += 60
         guardian_info = [
-            f"Last motion: Living room • {self.guardian_inactive_minutes} minutes ago",
-            f"Next check-in cue in: {self.guardian_checkin_minutes} minutes",
+            f"Last motion: Living room",
+            f"{self.guardian_inactive_minutes} minutes ago",
+            f"Next check-in: {self.guardian_checkin_minutes} min",
             "",
             "If no response:",
             "  • Project CHECK-IN alert",
-            "  • Ping caregiver & neighbor group",
-            "  • Log to daily safety summary",
+            "  • Ping caregiver & neighbor",
+            "  • Log to safety summary",
         ]
 
         for line in guardian_info:
-            self.draw_text(line, (guard_x, guard_y), self.font_small, COLORS['text'])
+            self.draw_text(line, (right_col_x, guard_y), self.font_small, COLORS['text'])
             guard_y += 38
 
-        # Footer
+        # Footer - centered
         self.draw_text("SPACE: Toggle next DUE → TAKEN  |  ESC: Main Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_automotive(self):
-        """Automotive - Curbside Projection"""
+        """Automotive - Curbside Projection - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
-        # Header
-        self.draw_text("Automotive", (DISPLAY_WIDTH // 2, 60),
+        # Header - centered
+        self.draw_text("Automotive", (DISPLAY_WIDTH // 2, 70),
                       self.font_large, COLORS['automotive'], align='center')
         self.draw_text("Curbside Projection • Delivery Guidance",
-                      (DISPLAY_WIDTH // 2, 120),
+                      (DISPLAY_WIDTH // 2, 140),
                       self.font_small, COLORS['muted'], align='center')
 
-        # Big banner
-        banner_rect = pygame.Rect(200, 220, DISPLAY_WIDTH - 400, 180)
+        # Big banner - centered in middle of screen
+        banner_y = DISPLAY_HEIGHT // 2 - 90
+        banner_rect = pygame.Rect(200, banner_y, DISPLAY_WIDTH - 400, 180)
         self.draw_panel(banner_rect, COLORS['automotive'], border_width=4)
 
-        self.draw_text("[DELIVERY]", (DISPLAY_WIDTH // 2, 260),
+        self.draw_text("[DELIVERY]", (DISPLAY_WIDTH // 2, banner_y + 40),
                       self.font_large, COLORS['automotive'], align='center')
 
         delivery_text = f"{self.delivery_apt} • {self.delivery_message}"
-        self.draw_text(delivery_text, (DISPLAY_WIDTH // 2, 340),
+        self.draw_text(delivery_text, (DISPLAY_WIDTH // 2, banner_y + 120),
                       self.font_medium, COLORS['text'], align='center')
 
-        # Arrow with pulse animation
+        # Arrow with pulse animation - to the right of banner
         self.arrow_pulse = (self.arrow_pulse + 0.1) % (2 * 3.14159)
         arrow_offset = int(20 * abs(pygame.math.Vector2(1, 0).rotate(self.arrow_pulse * 180 / 3.14159).x))
 
         arrow_x = DISPLAY_WIDTH // 2 + 300 + arrow_offset
-        arrow_y = 450
+        arrow_y = banner_y + 90
 
         # Draw arrow pointing right
         arrow_points = [
@@ -306,43 +314,45 @@ class MotiBeamOS:
         ]
         pygame.draw.polygon(self.screen, COLORS['automotive'], arrow_points)
 
-        # Bottom labels
-        self.draw_text("[SLOW] Residential zone", (250, DISPLAY_HEIGHT - 80),
-                      self.font_small, COLORS['warning'])
-        self.draw_text("[WATCH] Kids & pets", (DISPLAY_WIDTH - 250, DISPLAY_HEIGHT - 80),
-                      self.font_small, COLORS['warning'], align='right')
+        # Bottom labels - centered
+        bottom_y = DISPLAY_HEIGHT - 100
+        self.draw_text("[SLOW] Residential zone", (DISPLAY_WIDTH // 2 - 200, bottom_y),
+                      self.font_small, COLORS['warning'], align='center')
+        self.draw_text("[WATCH] Kids & pets", (DISPLAY_WIDTH // 2 + 200, bottom_y),
+                      self.font_small, COLORS['warning'], align='center')
 
-        # Footer
+        # Footer - centered
         self.draw_text("ESC: Main Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_emergency(self):
-        """Emergency Response - CPR Steps"""
+        """Emergency Response - CPR Steps - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
-        # Header
-        self.draw_text("Emergency Response", (DISPLAY_WIDTH // 2, 60),
+        # Header - centered
+        self.draw_text("Emergency Response", (DISPLAY_WIDTH // 2, 70),
                       self.font_large, COLORS['emergency'], align='center')
         self.draw_text("At-a-Glance Steps • Not medical advice • visual prompts only",
-                      (DISPLAY_WIDTH // 2, 115),
+                      (DISPLAY_WIDTH // 2, 135),
                       self.font_tiny, COLORS['muted'], align='center')
 
-        # Flashing emergency banner
+        # Flashing emergency banner - centered
         flash = int(time.time() * 2) % 2 == 0
+        banner_y = 180
         if flash:
-            banner_rect = pygame.Rect(150, 160, DISPLAY_WIDTH - 300, 60)
+            banner_rect = pygame.Rect(150, banner_y, DISPLAY_WIDTH - 300, 60)
             pygame.draw.rect(self.screen, COLORS['emergency'], banner_rect, border_radius=10)
             self.draw_text("[EMERGENCY] CALL 911 FIRST IF SAFE TO DO SO",
-                          (DISPLAY_WIDTH // 2, 190),
+                          (DISPLAY_WIDTH // 2, banner_y + 30),
                           self.font_medium, COLORS['text'], align='center')
 
-        # CPR Steps
-        steps_y = 260
+        # CPR Steps - centered
+        steps_y = 280
         self.draw_text("CPR Steps (Adult):", (DISPLAY_WIDTH // 2, steps_y),
                       self.font_medium, COLORS['emergency'], align='center')
 
-        steps_y += 60
+        steps_y += 70
         steps = [
             "1) Check responsiveness & breathing.",
             "2) Call 911 or direct someone to call.",
@@ -355,35 +365,38 @@ class MotiBeamOS:
         for step in steps:
             self.draw_text(step, (DISPLAY_WIDTH // 2, steps_y),
                           self.font_small, COLORS['text'], align='center')
-            steps_y += 45
+            steps_y += 50
 
-        # Footer
+        # Footer - centered
         self.draw_text("ESC: Main Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_industrial(self):
-        """Industrial - Safety Zones"""
+        """Industrial - Safety Zones - SYMMETRIC AROUND CENTER"""
         self.screen.fill(COLORS['bg'])
 
-        # Header
-        self.draw_text("Industrial / Enterprise Safety", (DISPLAY_WIDTH // 2, 60),
+        # Header - centered
+        self.draw_text("Industrial / Enterprise Safety", (DISPLAY_WIDTH // 2, 70),
                       self.font_large, COLORS['industrial'], align='center')
         self.draw_text("PPE • Hazards • Safe Workflows",
-                      (DISPLAY_WIDTH // 2, 120),
+                      (DISPLAY_WIDTH // 2, 140),
                       self.font_small, COLORS['muted'], align='center')
 
-        # Two-panel layout
-        panel_y = 200
+        # Two-panel layout - symmetric around center
+        center_x = DISPLAY_WIDTH // 2
+        panel_y = 210
         panel_height = 380
+        panel_width = 520
 
         # Left panel - Safe Lane
-        left_rect = pygame.Rect(80, panel_y, 520, panel_height)
+        left_panel_x = center_x - panel_width - 10
+        left_rect = pygame.Rect(left_panel_x, panel_y, panel_width, panel_height)
         self.draw_panel(left_rect, COLORS['success'], border_width=3)
 
-        self.draw_text("[SAFE LANE]", (340, panel_y + 30),
+        self.draw_text("[SAFE LANE]", (left_panel_x + panel_width // 2, panel_y + 30),
                       self.font_medium, COLORS['success'], align='center')
-        self.draw_text("Walk-only corridor", (340, panel_y + 75),
+        self.draw_text("Walk-only corridor", (left_panel_x + panel_width // 2, panel_y + 75),
                       self.font_small, COLORS['text'], align='center')
 
         safe_items = [
@@ -395,23 +408,24 @@ class MotiBeamOS:
 
         item_y = panel_y + 140
         for item in safe_items:
-            self.draw_text(item, (120, item_y), self.font_small, COLORS['text'])
+            self.draw_text(item, (left_panel_x + 40, item_y), self.font_small, COLORS['text'])
             item_y += 50
 
         # Center boundary line with pulse
         pulse = int(time.time() * 4) % 2 == 0
         boundary_color = COLORS['industrial'] if pulse else COLORS['muted']
         pygame.draw.line(self.screen, boundary_color,
-                        (DISPLAY_WIDTH // 2, panel_y),
-                        (DISPLAY_WIDTH // 2, panel_y + panel_height), 5)
+                        (center_x, panel_y),
+                        (center_x, panel_y + panel_height), 5)
 
         # Right panel - Hazard Zone
-        right_rect = pygame.Rect(680, panel_y, 520, panel_height)
+        right_panel_x = center_x + 10
+        right_rect = pygame.Rect(right_panel_x, panel_y, panel_width, panel_height)
         self.draw_panel(right_rect, COLORS['emergency'], border_width=3)
 
-        self.draw_text("[HAZARD]", (940, panel_y + 30),
+        self.draw_text("[HAZARD]", (right_panel_x + panel_width // 2, panel_y + 30),
                       self.font_medium, COLORS['emergency'], align='center')
-        self.draw_text("Forklift crossing", (940, panel_y + 75),
+        self.draw_text("Forklift crossing", (right_panel_x + panel_width // 2, panel_y + 75),
                       self.font_small, COLORS['text'], align='center')
 
         hazard_items = [
@@ -423,34 +437,35 @@ class MotiBeamOS:
 
         item_y = panel_y + 140
         for item in hazard_items:
-            self.draw_text(item, (720, item_y), self.font_small, COLORS['text'])
+            self.draw_text(item, (right_panel_x + 40, item_y), self.font_small, COLORS['text'])
             item_y += 50
 
-        # Footer
+        # Footer - centered
         self.draw_text("ESC: Main Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_security(self):
-        """Security - Guardian Watch"""
+        """Security - Guardian Watch - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
-        # Header
-        self.draw_text("Security", (DISPLAY_WIDTH // 2, 60),
+        # Header - centered
+        self.draw_text("Security", (DISPLAY_WIDTH // 2, 70),
                       self.font_large, COLORS['security'], align='center')
         self.draw_text("Guardian Watch • Inactivity Monitor",
-                      (DISPLAY_WIDTH // 2, 120),
+                      (DISPLAY_WIDTH // 2, 140),
                       self.font_small, COLORS['muted'], align='center')
 
-        # Main guardian panel
-        panel_rect = pygame.Rect(240, 200, DISPLAY_WIDTH - 480, 320)
+        # Main guardian panel - centered
+        panel_y = 210
+        panel_rect = pygame.Rect(240, panel_y, DISPLAY_WIDTH - 480, 320)
         self.draw_panel(panel_rect, COLORS['security'], border_width=3)
 
-        panel_y = 230
-        self.draw_text("[GUARDIAN MODE] ACTIVE", (DISPLAY_WIDTH // 2, panel_y),
+        panel_text_y = panel_y + 40
+        self.draw_text("[GUARDIAN MODE] ACTIVE", (DISPLAY_WIDTH // 2, panel_text_y),
                       self.font_large, COLORS['security'], align='center')
 
-        panel_y += 80
+        panel_text_y += 90
         guardian_details = [
             f"Last motion: Living room • {self.guardian_inactive_minutes} minutes ago",
             f"Next check-in cue in: {self.guardian_checkin_minutes} minutes",
@@ -462,25 +477,30 @@ class MotiBeamOS:
         ]
 
         for line in guardian_details:
-            self.draw_text(line, (DISPLAY_WIDTH // 2, panel_y),
+            self.draw_text(line, (DISPLAY_WIDTH // 2, panel_text_y),
                           self.font_small, COLORS['text'], align='center')
-            panel_y += 38
+            panel_text_y += 40
 
-        # Bottom badges
+        # Bottom badges - centered and balanced
         badge_y = 570
-        left_badge_rect = pygame.Rect(200, badge_y, 450, 80)
+        badge_width = 450
+        badge_height = 80
+
+        left_badge_x = DISPLAY_WIDTH // 2 - badge_width - 30
+        left_badge_rect = pygame.Rect(left_badge_x, badge_y, badge_width, badge_height)
         self.draw_panel(left_badge_rect, COLORS['success'], border_width=3)
-        self.draw_text("CHECK-IN REMINDER SENT", (425, badge_y + 40),
+        self.draw_text("CHECK-IN REMINDER SENT", (left_badge_x + badge_width // 2, badge_y + 40),
                       self.font_small, COLORS['success'], align='center')
 
-        right_badge_rect = pygame.Rect(DISPLAY_WIDTH - 650, badge_y, 450, 80)
+        right_badge_x = DISPLAY_WIDTH // 2 + 30
+        right_badge_rect = pygame.Rect(right_badge_x, badge_y, badge_width, badge_height)
         self.draw_panel(right_badge_rect, COLORS['emergency'], border_width=3)
-        self.draw_text("ESCALATE IF NO RESPONSE", (DISPLAY_WIDTH - 425, badge_y + 40),
+        self.draw_text("ESCALATE IF NO RESPONSE", (right_badge_x + badge_width // 2, badge_y + 40),
                       self.font_small, COLORS['emergency'], align='center')
 
-        # Footer
+        # Footer - centered
         self.draw_text("ESC: Main Menu",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
                       self.font_small, COLORS['muted'], align='center')
 
     def handle_events(self):
