@@ -162,11 +162,11 @@ class EducationDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header()
 
-        # Title - positioned in upper third
+        # Title - positioned higher, around 20-25% from top
         self.draw_text("5TH GRADE LEARNING CENTER",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 4), self.font_large, COLORS['accent'], align='center')
+                      (DISPLAY_WIDTH // 2, int(DISPLAY_HEIGHT * 0.23)), self.font_large, COLORS['accent'], align='center')
 
-        # Menu options - centered vertically in middle 50% of screen
+        # Menu options - centered in middle of screen
         options = [
             "1 - Math Word Problems",
             "2 - Vocabulary Builder",
@@ -176,7 +176,8 @@ class EducationDemo:
         num_options = len(options)
         option_spacing = 75
         total_options_height = num_options * option_spacing
-        y_start = (DISPLAY_HEIGHT - total_options_height) // 2 + 30
+        # Center the options block, starting below title
+        y_start = max(280, (DISPLAY_HEIGHT - total_options_height) // 2 + 50)
 
         y_pos = y_start
         for option in options:
@@ -197,9 +198,9 @@ class EducationDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header()
 
-        # Title - positioned in upper area
+        # Title - positioned around 20% from top
         self.draw_text("MATH WORD PROBLEMS",
-                      (DISPLAY_WIDTH // 2, 130), self.font_large, COLORS['success'], align='center')
+                      (DISPLAY_WIDTH // 2, int(DISPLAY_HEIGHT * 0.20)), self.font_large, COLORS['success'], align='center')
 
         # Select random problem if none selected
         if self.current_math_problem is None:
@@ -207,7 +208,7 @@ class EducationDemo:
             self.show_math_answer = False
 
         # Draw question with proper wrapping - centered in middle area
-        question_y = 220
+        question_y = 240
         self.draw_text("Question:", (DISPLAY_WIDTH // 2, question_y), self.font_medium, COLORS['accent'], align='center')
 
         # Wrap the question text
@@ -244,12 +245,12 @@ class EducationDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header()
 
-        # Title - positioned in upper area
+        # Title - positioned around 20% from top
         self.draw_text("VOCABULARY BUILDER",
-                      (DISPLAY_WIDTH // 2, 130), self.font_large, COLORS['accent'], align='center')
+                      (DISPLAY_WIDTH // 2, int(DISPLAY_HEIGHT * 0.20)), self.font_large, COLORS['accent'], align='center')
 
-        # Display all vocabulary words - centered vertically
-        y_pos = 240
+        # Display all vocabulary words - centered, starting lower
+        y_pos = 250
         for vocab in self.vocab_words:
             # Word - centered
             self.draw_text(vocab["word"], (DISPLAY_WIDTH // 2, y_pos), self.font_medium, COLORS['success'], align='center')

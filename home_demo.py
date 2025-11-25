@@ -158,16 +158,16 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("FAMILY DASHBOARD")
 
-        # Time and date - centered in upper area
+        # Time and date - centered, pushed down slightly
         now = datetime.now()
         self.draw_text(now.strftime("%A, %B %d, %Y"),
-                      (DISPLAY_WIDTH // 2, 150), self.font_medium, COLORS['text'], align='center')
+                      (DISPLAY_WIDTH // 2, 165), self.font_medium, COLORS['text'], align='center')
         self.draw_text(now.strftime("%I:%M %p"),
-                      (DISPLAY_WIDTH // 2, 210), self.font_large, COLORS['accent'], align='center')
+                      (DISPLAY_WIDTH // 2, 225), self.font_large, COLORS['accent'], align='center')
 
-        # Quick status grid - balanced around center
+        # Quick status grid - balanced around center, pushed down
         center_x = DISPLAY_WIDTH // 2
-        y_base = 300
+        y_base = 320
 
         # Left column - offset from center
         left_col_x = center_x - 320
@@ -282,9 +282,9 @@ class HomeDemo:
         self.screen.fill(COLORS['bg'])
         self.draw_header("SMART HOME CONTROLS")
 
-        # Control grid - balanced around center
+        # Control grid - balanced around center, pushed down
         center_x = DISPLAY_WIDTH // 2
-        controls_y_start = 220
+        controls_y_start = 250
         col1_x = center_x - 360
         col2_x = center_x + 80
 

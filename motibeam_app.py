@@ -158,26 +158,26 @@ class MotiBeamOS:
             self.current_screen = "menu"
 
     def render_menu(self):
-        """Render main menu - v4 style, better centered"""
+        """Render main menu - v4 style, vertically centered"""
         self.screen.fill(COLORS['bg'])
 
-        # Header - top area
-        self.draw_text("MotiBeam OS", (DISPLAY_WIDTH // 2, 70),
+        # Header - moved down to ~110
+        self.draw_text("MotiBeam OS", (DISPLAY_WIDTH // 2, 110),
                       self.font_huge, COLORS['accent'], align='center')
 
-        # Subtitle
+        # Subtitle - moved down to ~175
         self.draw_text("Ambient Projection Hub • Select a vertical to demo",
-                      (DISPLAY_WIDTH // 2, 160),
+                      (DISPLAY_WIDTH // 2, 175),
                       self.font_small, COLORS['muted'], align='center')
 
-        # Menu items - centered in middle 50% of screen
-        # Calculate total height needed for all items
+        # Menu items - vertically centered block in middle of screen
         num_items = len(self.menu_items)
-        y_spacing = 65
-        total_menu_height = num_items * y_spacing
+        row_height = 70
+        total_height = num_items * row_height
 
-        # Start position: center the block vertically
-        y_start = (DISPLAY_HEIGHT - total_menu_height) // 2 + 30
+        # Start block around middle of screen, below header
+        y_start = max(260, (DISPLAY_HEIGHT - total_height) // 2 + 40)
+        y_spacing = row_height
 
         for i, (key, name, desc) in enumerate(self.menu_items):
             y_pos = y_start + (i * y_spacing)
@@ -200,20 +200,23 @@ class MotiBeamOS:
             self.draw_text(desc, (DISPLAY_WIDTH // 2, y_pos + 35),
                           self.font_tiny, COLORS['muted'], align='center')
 
-        # Controls - bottom
+        # Controls - anchored at bottom
         self.draw_text("↑/↓ or W/S: Navigate  |  1-7: Jump  |  ENTER: Select  |  ESC: Exit",
-                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 50),
+                      (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT - 40),
                       self.font_small, COLORS['muted'], align='center')
 
     def render_clinical(self):
         """Clinical Care - Medication + Guardian Mode - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
+        # Vertical offset to push content down
+        OFFSET_Y = 80
+
         # Header - centered at top
-        self.draw_text("Clinical Care", (DISPLAY_WIDTH // 2, 70),
+        self.draw_text("Clinical Care", (DISPLAY_WIDTH // 2, 60 + OFFSET_Y),
                       self.font_large, COLORS['clinical'], align='center')
         self.draw_text("Veteran Support • Medication & Guardian Mode",
-                      (DISPLAY_WIDTH // 2, 140),
+                      (DISPLAY_WIDTH // 2, 120 + OFFSET_Y),
                       self.font_small, COLORS['muted'], align='center')
 
         # Two-column layout, balanced around center
@@ -222,7 +225,7 @@ class MotiBeamOS:
         right_col_x = center_x + 50
 
         # Left panel - Medication schedule
-        med_y = 200
+        med_y = 180 + OFFSET_Y
         self.draw_text("Today's Medication Schedule:", (left_col_x, med_y),
                       self.font_medium, COLORS['text'])
 
@@ -244,14 +247,14 @@ class MotiBeamOS:
             med_y += 45
 
         # Right panel - Guardian Mode - centered in right column
-        guard_y = 200
-        guard_rect = pygame.Rect(right_col_x - 20, guard_y - 20, 520, 380)
+        guard_top = 200 + OFFSET_Y
+        guard_rect = pygame.Rect(right_col_x - 20, guard_top - 20, 520, 380)
         self.draw_panel(guard_rect, COLORS['clinical'], border_width=3)
 
-        self.draw_text("[GUARDIAN MODE]", (right_col_x + 240, guard_y),
+        self.draw_text("[GUARDIAN MODE]", (right_col_x + 240, guard_top),
                       self.font_medium, COLORS['clinical'], align='center')
 
-        guard_y += 60
+        guard_y = guard_top + 60
         guardian_info = [
             f"Last motion: Living room",
             f"{self.guardian_inactive_minutes} minutes ago",
@@ -276,15 +279,18 @@ class MotiBeamOS:
         """Automotive - Curbside Projection - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
+        # Vertical offset to push content down
+        OFFSET_Y = 80
+
         # Header - centered
-        self.draw_text("Automotive", (DISPLAY_WIDTH // 2, 70),
+        self.draw_text("Automotive", (DISPLAY_WIDTH // 2, 70 + OFFSET_Y),
                       self.font_large, COLORS['automotive'], align='center')
         self.draw_text("Curbside Projection • Delivery Guidance",
-                      (DISPLAY_WIDTH // 2, 140),
+                      (DISPLAY_WIDTH // 2, 140 + OFFSET_Y),
                       self.font_small, COLORS['muted'], align='center')
 
         # Big banner - centered in middle of screen
-        banner_y = DISPLAY_HEIGHT // 2 - 90
+        banner_y = 220 + OFFSET_Y
         banner_rect = pygame.Rect(200, banner_y, DISPLAY_WIDTH - 400, 180)
         self.draw_panel(banner_rect, COLORS['automotive'], border_width=4)
 
@@ -330,16 +336,19 @@ class MotiBeamOS:
         """Emergency Response - CPR Steps - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
+        # Vertical offset to push content down
+        OFFSET_Y = 60
+
         # Header - centered
-        self.draw_text("Emergency Response", (DISPLAY_WIDTH // 2, 70),
+        self.draw_text("Emergency Response", (DISPLAY_WIDTH // 2, 70 + OFFSET_Y),
                       self.font_large, COLORS['emergency'], align='center')
         self.draw_text("At-a-Glance Steps • Not medical advice • visual prompts only",
-                      (DISPLAY_WIDTH // 2, 135),
+                      (DISPLAY_WIDTH // 2, 135 + OFFSET_Y),
                       self.font_tiny, COLORS['muted'], align='center')
 
         # Flashing emergency banner - centered
         flash = int(time.time() * 2) % 2 == 0
-        banner_y = 180
+        banner_y = 180 + OFFSET_Y
         if flash:
             banner_rect = pygame.Rect(150, banner_y, DISPLAY_WIDTH - 300, 60)
             pygame.draw.rect(self.screen, COLORS['emergency'], banner_rect, border_radius=10)
@@ -348,7 +357,7 @@ class MotiBeamOS:
                           self.font_medium, COLORS['text'], align='center')
 
         # CPR Steps - centered
-        steps_y = 280
+        steps_y = 280 + OFFSET_Y
         self.draw_text("CPR Steps (Adult):", (DISPLAY_WIDTH // 2, steps_y),
                       self.font_medium, COLORS['emergency'], align='center')
 
@@ -376,17 +385,20 @@ class MotiBeamOS:
         """Industrial - Safety Zones - SYMMETRIC AROUND CENTER"""
         self.screen.fill(COLORS['bg'])
 
+        # Vertical offset to push content down
+        OFFSET_Y = 70
+
         # Header - centered
-        self.draw_text("Industrial / Enterprise Safety", (DISPLAY_WIDTH // 2, 70),
+        self.draw_text("Industrial / Enterprise Safety", (DISPLAY_WIDTH // 2, 70 + OFFSET_Y),
                       self.font_large, COLORS['industrial'], align='center')
         self.draw_text("PPE • Hazards • Safe Workflows",
-                      (DISPLAY_WIDTH // 2, 140),
+                      (DISPLAY_WIDTH // 2, 140 + OFFSET_Y),
                       self.font_small, COLORS['muted'], align='center')
 
         # Two-panel layout - symmetric around center
         center_x = DISPLAY_WIDTH // 2
-        panel_y = 210
-        panel_height = 380
+        panel_y = 210 + OFFSET_Y
+        panel_height = 340
         panel_width = 520
 
         # Left panel - Safe Lane
@@ -449,16 +461,19 @@ class MotiBeamOS:
         """Security - Guardian Watch - CENTERED"""
         self.screen.fill(COLORS['bg'])
 
+        # Vertical offset to push content down
+        OFFSET_Y = 70
+
         # Header - centered
-        self.draw_text("Security", (DISPLAY_WIDTH // 2, 70),
+        self.draw_text("Security", (DISPLAY_WIDTH // 2, 70 + OFFSET_Y),
                       self.font_large, COLORS['security'], align='center')
         self.draw_text("Guardian Watch • Inactivity Monitor",
-                      (DISPLAY_WIDTH // 2, 140),
+                      (DISPLAY_WIDTH // 2, 140 + OFFSET_Y),
                       self.font_small, COLORS['muted'], align='center')
 
         # Main guardian panel - centered
-        panel_y = 210
-        panel_rect = pygame.Rect(240, panel_y, DISPLAY_WIDTH - 480, 320)
+        panel_y = 210 + OFFSET_Y
+        panel_rect = pygame.Rect(240, panel_y, DISPLAY_WIDTH - 480, 300)
         self.draw_panel(panel_rect, COLORS['security'], border_width=3)
 
         panel_text_y = panel_y + 40
@@ -482,20 +497,20 @@ class MotiBeamOS:
             panel_text_y += 40
 
         # Bottom badges - centered and balanced
-        badge_y = 570
+        badge_y = 550 + OFFSET_Y
         badge_width = 450
-        badge_height = 80
+        badge_height = 70
 
         left_badge_x = DISPLAY_WIDTH // 2 - badge_width - 30
         left_badge_rect = pygame.Rect(left_badge_x, badge_y, badge_width, badge_height)
         self.draw_panel(left_badge_rect, COLORS['success'], border_width=3)
-        self.draw_text("CHECK-IN REMINDER SENT", (left_badge_x + badge_width // 2, badge_y + 40),
+        self.draw_text("CHECK-IN REMINDER SENT", (left_badge_x + badge_width // 2, badge_y + 35),
                       self.font_small, COLORS['success'], align='center')
 
         right_badge_x = DISPLAY_WIDTH // 2 + 30
         right_badge_rect = pygame.Rect(right_badge_x, badge_y, badge_width, badge_height)
         self.draw_panel(right_badge_rect, COLORS['emergency'], border_width=3)
-        self.draw_text("ESCALATE IF NO RESPONSE", (right_badge_x + badge_width // 2, badge_y + 40),
+        self.draw_text("ESCALATE IF NO RESPONSE", (right_badge_x + badge_width // 2, badge_y + 35),
                       self.font_small, COLORS['emergency'], align='center')
 
         # Footer - centered
