@@ -70,15 +70,15 @@ class ClinicalWellnessEnhanced(MotiBeamScene):
         
     def render_menu(self):
         self.draw_header("CLINICAL & WELLNESS", "Select Feature")
-        
+
         menu_items = [
             ("1", "💊 Medication Schedule", self.colors['green']),
             ("2", "💪 Wellness Tracker", self.colors['cyan']),
             ("3", "😴 Sleep Analysis", self.colors['blue']),
             ("4", "📋 Activity Log", self.colors['purple']),
         ]
-        
-        y_pos = 280
+
+        y_pos = 260
         for key, name, color in menu_items:
             text = f"{key}. {name}"
             text_surf = self.font_large.render(text, True, color)
@@ -91,8 +91,8 @@ class ClinicalWellnessEnhanced(MotiBeamScene):
         
     def render_medication(self):
         self.draw_header("💊 MEDICATION SCHEDULE", datetime.now().strftime("%I:%M %p"))
-        
-        y_pos = 280
+
+        y_pos = 240
         for med in self.medications:
             if med['status'] == 'taken':
                 color = self.colors['green']
@@ -114,8 +114,8 @@ class ClinicalWellnessEnhanced(MotiBeamScene):
         
     def render_wellness(self):
         self.draw_header("💪 WELLNESS TRACKER", "Today's Metrics")
-        
-        y_pos = 280
+
+        y_pos = 240
         for item in self.wellness:
             name_surf = self.font_medium.render(item['metric'], True, self.colors['cyan'])
             self.screen.blit(name_surf, (200, y_pos))
@@ -140,17 +140,17 @@ class ClinicalWellnessEnhanced(MotiBeamScene):
         
     def render_sleep(self):
         self.draw_header("😴 SLEEP ANALYSIS", "Last Night")
-        
+
         duration_surf = self.font_huge.render(self.sleep['last_night'], True, self.colors['blue'])
-        duration_rect = duration_surf.get_rect(center=(self.width//2, 280))
+        duration_rect = duration_surf.get_rect(center=(self.width//2, 300))
         self.screen.blit(duration_surf, duration_rect)
-        
+
         quality_text = f"Quality: {self.sleep['quality']}"
         quality_surf = self.font_large.render(quality_text, True, self.colors['green'])
-        quality_rect = quality_surf.get_rect(center=(self.width//2, 400))
+        quality_rect = quality_surf.get_rect(center=(self.width//2, 420))
         self.screen.blit(quality_surf, quality_rect)
-        
-        y_pos = 500
+
+        y_pos = 510
         breakdown = [
             f"Deep Sleep: {self.sleep['deep_sleep']}",
             f"REM Sleep: {self.sleep['rem_sleep']}"
@@ -167,15 +167,15 @@ class ClinicalWellnessEnhanced(MotiBeamScene):
         
     def render_activity(self):
         self.draw_header("📋 ACTIVITY LOG", "Recent Events")
-        
+
         activities = [
             ("09:15 AM", "💊 Morning medication taken", self.colors['green']),
             ("10:30 AM", "🚶 15-minute walk completed", self.colors['cyan']),
             ("12:00 PM", "❤️  Blood pressure: 118/76", self.colors['white']),
             ("02:45 PM", "💧 Hydration reminder", self.colors['blue']),
         ]
-        
-        y_pos = 280
+
+        y_pos = 250
         for time, activity, color in activities:
             time_surf = self.font_small.render(time, True, self.colors['gray'])
             self.screen.blit(time_surf, (150, y_pos))

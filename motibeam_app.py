@@ -131,7 +131,7 @@ class MotiBeamApp:
             glow_color = tuple(int(c * glow_pulse) for c in self.colors['cyan'])
             
             logo = self.font_huge.render("MotiBeam OS", True, glow_color)
-            logo_rect = logo.get_rect(center=(self.width//2, 100))  # Moved up from 120
+            logo_rect = logo.get_rect(center=(self.width//2, 110))
             self.screen.blit(logo, logo_rect)
             
             # Tagline
@@ -144,9 +144,9 @@ class MotiBeamApp:
             menu_title_rect = menu_title.get_rect(centerx=self.width//2, top=230)  # Moved up from 270
             self.screen.blit(menu_title, menu_title_rect)
             
-            # Menu items with symbols - TIGHTER SPACING to fit all 6
-            y_pos = 310  # Starting position moved up from 360
-            y_spacing = 60  # Reduced from 75 to fit all 6 items
+            # Menu items with symbols - centered positioning
+            y_pos = 260  # Starting position for better vertical centering
+            y_spacing = 70  # Spacing between menu items
             
             for i, item in enumerate(menu_items):
                 is_hovered = (i == hover_index)

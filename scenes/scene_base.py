@@ -71,11 +71,11 @@ class MotiBeamScene:
                     
     def draw_header(self, title, subtitle=""):
         """Draw scene header"""
-        # Title
+        # Title - positioned lower for better vertical centering
         title_surf = self.font_large.render(title, True, self.colors['cyan'])
-        title_rect = title_surf.get_rect(centerx=self.width//2, top=50)
+        title_rect = title_surf.get_rect(centerx=self.width//2, top=60)
         self.screen.blit(title_surf, title_rect)
-        
+
         # Subtitle
         if subtitle:
             sub_surf = self.font_small.render(subtitle, True, self.colors['white'])

@@ -24,13 +24,15 @@ class EmergencyDemo(MotiBeamScene):
             self.screen.fill(self.colors['black'])
         
         self.draw_header("🚨 EMERGENCY ALERT", "Evacuation System Active")
-        
+
+        # Emergency banner positioned lower for better vertical centering
+        banner_y = 250
         alert_surf = self.font_huge.render("EMERGENCY EXIT", True, self.colors['red'])
-        alert_rect = alert_surf.get_rect(center=(self.width//2, 280))
+        alert_rect = alert_surf.get_rect(center=(self.width//2, banner_y))
         self.screen.blit(alert_surf, alert_rect)
-        
+
         arrow_x = self.width - 300
-        arrow_y = 400
+        arrow_y = banner_y + 120
         arrow_size = 80
         
         points = [
@@ -44,12 +46,12 @@ class EmergencyDemo(MotiBeamScene):
         
         route_text = "EVACUATION ROUTE B"
         route_surf = self.font_large.render(route_text, True, self.colors['orange'])
-        route_rect = route_surf.get_rect(center=(self.width//2, 500))
+        route_rect = route_surf.get_rect(center=(self.width//2, banner_y + 230))
         self.screen.blit(route_surf, route_rect)
-        
+
         distance_text = "150 FEET TO SAFETY"
         dist_surf = self.font_medium.render(distance_text, True, self.colors['white'])
-        dist_rect = dist_surf.get_rect(center=(self.width//2, 580))
+        dist_rect = dist_surf.get_rect(center=(self.width//2, banner_y + 310))
         self.screen.blit(dist_surf, dist_rect)
         
         self.draw_footer("REMAIN CALM | FOLLOW PROJECTED PATH")

@@ -32,13 +32,13 @@ class EducationDemo(MotiBeamScene):
         seconds = self.timer_seconds % 60
         timer_text = f"{minutes:02d}:{seconds:02d}"
         timer_surf = self.font_huge.render(timer_text, True, self.colors['green'])
-        timer_rect = timer_surf.get_rect(center=(self.width//2, 200))
+        timer_rect = timer_surf.get_rect(center=(self.width//2, 240))
         self.screen.blit(timer_surf, timer_rect)
-        
+
         item = self.study_items[self.current_item]
-        
+
         word_label = self.font_small.render("TERM:", True, self.colors['cyan'])
-        word_label_rect = word_label.get_rect(centerx=self.width//2, top=300)
+        word_label_rect = word_label.get_rect(centerx=self.width//2, top=330)
         self.screen.blit(word_label, word_label_rect)
         
         word_surf = self.font_large.render(item['word'], True, self.colors['white'])
