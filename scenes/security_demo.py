@@ -23,7 +23,7 @@ class SecurityDemo(MotiBeamScene):
         self.draw_header("🛡️ GUARDIAN MODE ACTIVE", "Wellness & Safety Monitoring")
 
         # Guardian panel positioned for better vertical centering
-        panel_top = 260
+        panel_top = 300
         pulse_size = 80 + int(20 * abs(math.sin(self.pulse)))
         alert_center = (self.width // 2, panel_top + 50)
         pygame.draw.circle(self.screen, self.colors['orange'], alert_center, pulse_size, 8)

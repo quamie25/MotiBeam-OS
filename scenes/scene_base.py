@@ -73,13 +73,13 @@ class MotiBeamScene:
         """Draw scene header"""
         # Title - positioned lower for better vertical centering
         title_surf = self.font_large.render(title, True, self.colors['cyan'])
-        title_rect = title_surf.get_rect(centerx=self.width//2, top=60)
+        title_rect = title_surf.get_rect(centerx=self.width//2, top=80)
         self.screen.blit(title_surf, title_rect)
 
         # Subtitle
         if subtitle:
             sub_surf = self.font_small.render(subtitle, True, self.colors['white'])
-            sub_rect = sub_surf.get_rect(centerx=self.width//2, top=170)
+            sub_rect = sub_surf.get_rect(centerx=self.width//2, top=190)
             self.screen.blit(sub_surf, sub_rect)
             
     def draw_footer(self, text="Press ESC to exit"):

@@ -131,21 +131,21 @@ class MotiBeamApp:
             glow_color = tuple(int(c * glow_pulse) for c in self.colors['cyan'])
             
             logo = self.font_huge.render("MotiBeam OS", True, glow_color)
-            logo_rect = logo.get_rect(center=(self.width//2, 110))
+            logo_rect = logo.get_rect(center=(self.width//2, 130))
             self.screen.blit(logo, logo_rect)
-            
+
             # Tagline
             tagline = self.font_small.render("Multi-Vertical Ambient Computing Platform", True, self.colors['white'])
-            tagline_rect = tagline.get_rect(center=(self.width//2, 180))  # Moved up from 200
+            tagline_rect = tagline.get_rect(center=(self.width//2, 190))
             self.screen.blit(tagline, tagline_rect)
-            
+
             # Menu title
             menu_title = self.font_medium.render("SELECT VERTICAL:", True, self.colors['cyan'])
-            menu_title_rect = menu_title.get_rect(centerx=self.width//2, top=230)  # Moved up from 270
+            menu_title_rect = menu_title.get_rect(centerx=self.width//2, top=240)
             self.screen.blit(menu_title, menu_title_rect)
-            
+
             # Menu items with symbols - centered positioning
-            y_pos = 260  # Starting position for better vertical centering
+            y_pos = 300  # Starting position for better vertical centering
             y_spacing = 70  # Spacing between menu items
             
             for i, item in enumerate(menu_items):

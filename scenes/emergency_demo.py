@@ -26,7 +26,7 @@ class EmergencyDemo(MotiBeamScene):
         self.draw_header("🚨 EMERGENCY ALERT", "Evacuation System Active")
 
         # Emergency banner positioned lower for better vertical centering
-        banner_y = 250
+        banner_y = 270
         alert_surf = self.font_huge.render("EMERGENCY EXIT", True, self.colors['red'])
         alert_rect = alert_surf.get_rect(center=(self.width//2, banner_y))
         self.screen.blit(alert_surf, alert_rect)
