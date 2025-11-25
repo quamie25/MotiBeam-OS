@@ -485,6 +485,11 @@ class MotiBeamOS:
 
     def handle_events(self):
         """Handle keyboard events"""
+        # When Education or Home verticals are active, let them handle events
+        # Don't consume the event queue here
+        if self.current_screen in ("education", "home"):
+            return True
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False

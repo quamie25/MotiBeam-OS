@@ -342,7 +342,8 @@ class HomeDemo:
                     if self.current_screen == "menu":
                         # Exit application - clear screen first to avoid freeze
                         self.screen.fill((0, 0, 0))
-                        pygame.display.flip()
+                        if self.standalone:
+                            pygame.display.flip()
                         self.running = False
                         return False
                     else:
@@ -392,7 +393,9 @@ class HomeDemo:
         elif self.current_screen == "messages":
             self.render_messages()
 
-        pygame.display.flip()
+        # Only flip in standalone mode; main app flips in embedded mode
+        if self.standalone:
+            pygame.display.flip()
 
     def run(self):
         """Main loop for standalone mode"""
