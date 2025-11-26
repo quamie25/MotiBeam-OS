@@ -64,33 +64,24 @@ Paste the following content:
 ```ini
 [Unit]
 Description=MotiBeam OS - Multi-Vertical Ambient Computing Platform
-After=graphical.target network-online.target
-Wants=graphical.target network-online.target
+After=graphical.target
+Wants=graphical.target
 
 [Service]
 Type=simple
 User=motibeam
+Group=motibeam
 WorkingDirectory=/home/motibeam/MotiBeam-OS
 
-# Environment variables for X display
-Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/motibeam/.Xauthority
-
-# SDL settings for better compatibility
-Environment=SDL_VIDEODRIVER=x11
-Environment=SDL_AUDIODRIVER=pulse
-
-# Ensure clean output in logs
-Environment=PYTHONUNBUFFERED=1
-
 # Launch MotiBeam with logging wrapper
-ExecStart=/bin/bash /home/motibeam/MotiBeam-OS/scripts/run_motibeam_with_log.sh
+# The wrapper script sets DISPLAY, XAUTHORITY, and SDL variables
+ExecStart=/home/motibeam/MotiBeam-OS/scripts/run_motibeam_with_log.sh
 
-# Restart on failure (but not too aggressively)
+# Restart on failure
 Restart=on-failure
 RestartSec=10
 
-# Give the service time to start
+# Give service time to start
 TimeoutStartSec=30
 
 [Install]
