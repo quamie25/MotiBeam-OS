@@ -58,20 +58,52 @@ class EducationDemo(MotiBeamScene):
         ]
         self.current_vocab = 0
 
-        # Sleep Learning data
-        self.sleep_facts = [
-            "The human brain contains approximately 86 billion neurons",
-            "Your brain uses 20% of your body's total oxygen and energy",
-            "The speed of information in neurons can reach up to 268 mph",
-            "Your brain generates about 12-25 watts of electricity",
-            "The brain can't feel pain - it has no pain receptors",
-            "During sleep, your brain consolidates memories and learning",
-            "Neuroplasticity allows your brain to rewire itself",
-            "The average human brain weighs about 3 pounds",
+        # Sleep Learning Loop state - calming affirmations with fade animations
+        self.sleep_cards = [
+            {
+                "title": "YOUR BRAIN IS RESTING & LEARNING",
+                "line1": "Even during sleep, your brain is sorting memories.",
+                "line2": "It keeps what matters and lets go of the rest.",
+            },
+            {
+                "title": "YOU ARE SAFE HERE",
+                "line1": "Your breathing is slow and steady.",
+                "line2": "Every exhale lets tension leave your body.",
+            },
+            {
+                "title": "FOCUS TOMORROW STARTS NOW",
+                "line1": "Quality sleep recharges attention and memory.",
+                "line2": "You are giving your future self an advantage.",
+            },
+            {
+                "title": "GENTLE BRAIN FACT",
+                "line1": "Your brain uses about 20% of your body's energy.",
+                "line2": "Rest tonight so it can power your goals tomorrow.",
+            },
+            {
+                "title": "YOU ARE GROWING STRONGER",
+                "line1": "Every rest period rebuilds your mental resilience.",
+                "line2": "Tomorrow you will wake up more capable than today.",
+            },
+            {
+                "title": "LEARNING HAPPENS IN STILLNESS",
+                "line1": "Your brain is processing everything from today.",
+                "line2": "Deep rest makes those lessons permanent.",
+            },
         ]
-        self.current_fact = 0
-        self.sleep_cycle_time = 0
-        self.fact_display_duration = 10  # seconds per fact
+        self.sleep_index = 0
+        self.sleep_loop_start = None
+
+        # Fade timings (seconds)
+        self.sleep_fade_in = 2.0
+        self.sleep_hold = 8.0
+        self.sleep_fade_out = 2.0
+
+        # Additional colors and fonts for Sleep Learning Loop
+        self.colors['muted'] = (100, 100, 120)  # Soft gray-blue
+        self.colors['accent'] = (150, 120, 255)  # Soft purple
+        self.colors['text'] = (200, 200, 210)  # Light gray
+        self.font_tiny = pygame.font.Font(None, 30)
 
     def handle_events(self):
         """Handle mode-specific input - overrides base class"""
@@ -100,7 +132,7 @@ class EducationDemo(MotiBeamScene):
                         self.current_mode = "Sleep Learning Loop"
                         self.in_menu = False
                         self.start_time = pygame.time.get_ticks()
-                        self.sleep_cycle_time = time.time()
+                        self.sleep_loop_start = None  # Reset fade animation timer
                 else:
                     # Inside a mode
                     if event.key == pygame.K_ESCAPE:
@@ -118,17 +150,43 @@ class EducationDemo(MotiBeamScene):
                         elif event.key == pygame.K_RIGHT:
                             self.current_vocab = (self.current_vocab + 1) % len(self.language_vocab)
 
+    def _get_sleep_loop_state(self):
+        """Return (card_index, alpha) based on elapsed time for fade animation."""
+        if self.sleep_loop_start is None:
+            self.sleep_loop_start = time.time()
+
+        now = time.time()
+        elapsed = now - self.sleep_loop_start
+
+        cycle = self.sleep_fade_in + self.sleep_hold + self.sleep_fade_out
+        if cycle <= 0:
+            cycle = 1.0
+
+        # Which card are we on?
+        card_index = int(elapsed // cycle) % len(self.sleep_cards)
+
+        # Where in the fade cycle are we?
+        t = elapsed % cycle
+
+        if t < self.sleep_fade_in:
+            # Fade in 0 → 255
+            alpha = int(255 * (t / self.sleep_fade_in))
+        elif t < self.sleep_fade_in + self.sleep_hold:
+            # Fully visible
+            alpha = 255
+        else:
+            # Fade out 255 → 0
+            t_out = t - (self.sleep_fade_in + self.sleep_hold)
+            alpha = int(255 * max(0.0, 1.0 - (t_out / self.sleep_fade_out)))
+
+        return card_index, max(0, min(255, alpha))
+
     def update(self):
         """Update mode-specific logic"""
         if self.current_mode == "Study Session":
             elapsed = (pygame.time.get_ticks() - self.start_time) / 1000
             self.timer_seconds = max(0, (25 * 60) - int(elapsed))
-        elif self.current_mode == "Sleep Learning Loop":
-            # Auto-cycle through facts
-            elapsed = time.time() - self.sleep_cycle_time
-            if elapsed >= self.fact_display_duration:
-                self.current_fact = (self.current_fact + 1) % len(self.sleep_facts)
-                self.sleep_cycle_time = time.time()
+        # Sleep Learning Loop uses _get_sleep_loop_state() for automatic fade cycling
 
     def render(self):
         """Render current mode or menu"""
@@ -284,52 +342,50 @@ class EducationDemo(MotiBeamScene):
         self.draw_corner_markers(self.colors['purple'])
 
     def render_sleep_learning(self):
-        """Render ambient sleep learning loop"""
-        # Dark, minimal background for sleep mode
+        """Sleep Learning Loop - calming affirmations with smooth fade animations"""
+        # Soft dark background
         self.screen.fill((10, 10, 20))
 
-        # Gentle pulsing effect
-        t = time.time()
-        pulse = 0.7 + 0.3 * abs(math.sin(t * 0.5))
-        glow_color = tuple(int(c * pulse) for c in self.colors['purple'])
+        # Top label
+        title_surf = self.font_large.render("SLEEP LEARNING LOOP", True, self.colors['purple'])
+        title_rect = title_surf.get_rect(center=(self.width // 2, int(self.height * 0.18)))
+        self.screen.blit(title_surf, title_rect)
 
-        # Current fact (centered, large)
-        fact = self.sleep_facts[self.current_fact]
+        subtitle = "Gentle facts + affirmations while you rest"
+        sub_surf = self.font_small.render(subtitle, True, self.colors['muted'])
+        sub_rect = sub_surf.get_rect(center=(self.width // 2, int(self.height * 0.23)))
+        self.screen.blit(sub_surf, sub_rect)
 
-        # Word wrap for long facts
-        words = fact.split()
-        lines = []
-        current_line = []
+        # Get which card + alpha we should show
+        idx, alpha = self._get_sleep_loop_state()
+        card = self.sleep_cards[idx]
 
-        for word in words:
-            test_line = ' '.join(current_line + [word])
-            test_surf = self.font_medium.render(test_line, True, self.colors['white'])
-            if test_surf.get_width() > self.width - 200:
-                if current_line:
-                    lines.append(' '.join(current_line))
-                current_line = [word]
-            else:
-                current_line.append(word)
-        if current_line:
-            lines.append(' '.join(current_line))
+        # Prepare text surfaces with variable alpha
+        center_y = int(self.height * 0.50)
 
-        # Render lines
-        y_start = (self.height - len(lines) * 70) // 2
-        for i, line in enumerate(lines):
-            line_surf = self.font_medium.render(line, True, glow_color)
-            line_rect = line_surf.get_rect(center=(self.width//2, y_start + i * 70))
-            self.screen.blit(line_surf, line_rect)
+        card_title = self.font_medium.render(card["title"], True, self.colors['accent'])
+        line1 = self.font_small.render(card["line1"], True, self.colors['text'])
+        line2 = self.font_small.render(card["line2"], True, self.colors['text'])
 
-        # Subtle progress indicator
-        progress = f"{self.current_fact + 1}/{len(self.sleep_facts)}"
-        progress_surf = self.font_small.render(progress, True, (80, 80, 100))
-        progress_rect = progress_surf.get_rect(center=(self.width//2, self.height - 60))
-        self.screen.blit(progress_surf, progress_rect)
+        # Apply fade alpha to all text surfaces
+        for surf in (card_title, line1, line2):
+            surf.set_alpha(alpha)
 
-        # Very subtle footer
-        footer = self.font_small.render("Sleep Learning Mode - Auto Loop | ESC for menu", True, (60, 60, 80))
-        footer_rect = footer.get_rect(center=(self.width//2, self.height - 30))
-        self.screen.blit(footer, footer_rect)
+        # Position card title + lines
+        title_rect2 = card_title.get_rect(center=(self.width // 2, center_y - 30))
+        line1_rect = line1.get_rect(center=(self.width // 2, center_y + 10))
+        line2_rect = line2.get_rect(center=(self.width // 2, center_y + 40))
+
+        self.screen.blit(card_title, title_rect2)
+        self.screen.blit(line1, line1_rect)
+        self.screen.blit(line2, line2_rect)
+
+        # Footer hint (very low brightness)
+        footer = "ESC - Return to Education Menu"
+        footer_surf = self.font_tiny.render(footer, True, self.colors['muted'])
+        footer_surf.set_alpha(120)
+        footer_rect = footer_surf.get_rect(center=(self.width // 2, self.height - 40))
+        self.screen.blit(footer_surf, footer_rect)
 
 if __name__ == "__main__":
     demo = EducationDemo(standalone=True)
