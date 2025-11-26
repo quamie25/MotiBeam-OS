@@ -6,13 +6,15 @@ Modes:
 - Study Session (Pomodoro timer with flashcards)
 - Homework Focus Wall (distraction-free task display)
 - Language Learning Wall (vocabulary practice)
-- Sleep Learning Loop (ambient, auto-looping content)
+- Sleep Learning Loop (ambient affirmations)
+- Learning Loop (rotating study materials)
 """
 
 import sys
 sys.path.insert(0, '/home/motibeam/MotiBeam-OS/scenes')
 
 from scene_base import MotiBeamScene
+from education_learning_loop import EducationLearningLoop
 import pygame
 import math
 import time
@@ -26,7 +28,8 @@ class EducationDemo(MotiBeamScene):
             "Study Session",
             "Homework Wall",
             "Language Wall",
-            "Sleep Learning Loop"
+            "Sleep Learning Loop",
+            "Learning Loop (Study Materials)"
         ]
         self.current_mode = None
         self.in_menu = True
@@ -133,6 +136,12 @@ class EducationDemo(MotiBeamScene):
                         self.in_menu = False
                         self.start_time = pygame.time.get_ticks()
                         self.sleep_loop_start = None  # Reset fade animation timer
+                    elif event.key == pygame.K_5:
+                        # Launch dedicated Learning Loop scene
+                        loop = EducationLearningLoop(standalone=False)
+                        loop.screen = self.screen
+                        loop.run(duration=300)  # Run for 5 minutes or until ESC
+                        # Don't change in_menu - stay in Education menu after loop exits
                 else:
                     # Inside a mode
                     if event.key == pygame.K_ESCAPE:
@@ -223,8 +232,8 @@ class EducationDemo(MotiBeamScene):
         self.screen.blit(subtitle, subtitle_rect)
 
         # Mode options
-        menu_y = 280
-        spacing = 80
+        menu_y = 260
+        spacing = 70  # Tighter spacing to fit 5 modes
 
         for i, mode in enumerate(self.modes):
             mode_text = f"{i+1}. {mode}"
@@ -233,7 +242,7 @@ class EducationDemo(MotiBeamScene):
             self.screen.blit(mode_surf, mode_rect)
 
         # Footer
-        footer = self.font_small.render("Select mode 1-4 | ESC to exit", True, self.colors['gray'])
+        footer = self.font_small.render("Select mode 1-5 | ESC to exit", True, self.colors['gray'])
         footer_rect = footer.get_rect(center=(self.width//2, self.height - 40))
         self.screen.blit(footer, footer_rect)
 
