@@ -5,6 +5,10 @@ Professional boot sequence + menu system + 6 vertical demos
 """
 
 import sys
+import os
+import traceback
+from datetime import datetime
+
 sys.path.insert(0, '/home/motibeam/MotiBeam-OS/scenes')
 
 import pygame
@@ -243,10 +247,68 @@ class MotiBeamApp:
         pygame.quit()
         print("MotiBeam OS shutdown complete.")
 
+def write_error_log(error_msg):
+    """Write error to log file for debugging"""
+    try:
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, 'motibeam_boot.log')
+
+        with open(log_file, 'a') as f:
+            f.write(f"\n{'='*60}\n")
+            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR\n")
+            f.write(f"{'='*60}\n")
+            f.write(error_msg)
+            f.write(f"\n{'='*60}\n\n")
+    except Exception as e:
+        print(f"Failed to write error log: {e}")
+
 if __name__ == "__main__":
     print("=" * 60)
     print("Starting MotiBeam OS v3.0")
     print("Multi-Vertical Ambient Computing Platform")
     print("=" * 60)
-    app = MotiBeamApp()
-    app.run()
+
+    try:
+        # Check if running in a display environment
+        if 'DISPLAY' not in os.environ:
+            error_msg = "ERROR: DISPLAY environment variable not set!\n"
+            error_msg += "MotiBeam requires an X server to run.\n"
+            print(error_msg)
+            write_error_log(error_msg)
+            sys.exit(1)
+
+        print(f"Display: {os.environ.get('DISPLAY')}")
+        print(f"User: {os.environ.get('USER', 'unknown')}")
+
+        # Initialize and run the application
+        app = MotiBeamApp()
+        app.run()
+
+        print("MotiBeam OS exited normally.")
+
+    except KeyboardInterrupt:
+        print("\nMotiBeam OS interrupted by user (Ctrl+C)")
+        pygame.quit()
+        sys.exit(0)
+
+    except Exception as e:
+        error_msg = f"FATAL ERROR: {str(e)}\n\n"
+        error_msg += "Traceback:\n"
+        error_msg += traceback.format_exc()
+
+        print("\n" + "=" * 60)
+        print("FATAL ERROR occurred:")
+        print("=" * 60)
+        print(error_msg)
+
+        # Write to log file
+        write_error_log(error_msg)
+
+        # Ensure pygame cleanup
+        try:
+            pygame.quit()
+        except:
+            pass
+
+        sys.exit(1)
