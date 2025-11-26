@@ -106,7 +106,100 @@ class EducationDemo(MotiBeamScene):
         self.colors['muted'] = (100, 100, 120)  # Soft gray-blue
         self.colors['accent'] = (150, 120, 255)  # Soft purple
         self.colors['text'] = (200, 200, 210)  # Light gray
+        self.colors['bg'] = (0, 0, 0)  # Pure black
         self.font_tiny = pygame.font.Font(None, 30)
+
+        # Learning Loop (Study Materials) - ambient study prompts with fades
+        self.learning_loop_items = [
+            # MEMORY & LEARNING SCIENCE
+            {
+                "title": "MEMORY FACT",
+                "line1": "Your brain strengthens memories while you sleep.",
+                "line2": "Review now + sleep later = long-term learning."
+            },
+            {
+                "title": "FOCUS RULE",
+                "line1": "Deep focus beats long hours.",
+                "line2": "25 minutes fully present > 2 hours half-distracted."
+            },
+            {
+                "title": "SPACED RECALL",
+                "line1": "Testing yourself builds stronger memories",
+                "line2": "than just rereading notes again and again."
+            },
+            # STUDY TACTICS
+            {
+                "title": "CHEAT CODE: TEACH IT",
+                "line1": "If you can explain it in simple words,",
+                "line2": "you probably understand it for real."
+            },
+            {
+                "title": "BREAK BIG TOPICS",
+                "line1": "Large chapters are just small ideas glued together.",
+                "line2": "Master one small idea at a time."
+            },
+            # SCIENCE & MATH MICRO-LESSONS
+            {
+                "title": "BIOLOGY • DNA",
+                "line1": "DNA is a recipe written with 4 letters: A, T, C, G.",
+                "line2": "Different orders of those letters build different life."
+            },
+            {
+                "title": "PHYSICS • GRAVITY",
+                "line1": "Gravity is the force that pulls masses together.",
+                "line2": "On Earth it gives objects their weight."
+            },
+            {
+                "title": "MATH • SLOPE",
+                "line1": "Slope measures how steep a line is.",
+                "line2": "It's 'rise over run' — change in y over change in x."
+            },
+            # LANGUAGE & WRITING
+            {
+                "title": "WRITING TIP",
+                "line1": "Good paragraphs start with a clear topic sentence.",
+                "line2": "The rest of the lines support that one idea."
+            },
+            {
+                "title": "LANGUAGE • NEW WORD",
+                "line1": "'Resilient' means able to bounce back after stress.",
+                "line2": "You are more resilient than you realize."
+            },
+            # MOTIVATION / SELF-BELIEF
+            {
+                "title": "YOU'RE GAINING SKILL",
+                "line1": "Every focused session adds invisible progress.",
+                "line2": "Future-you will be grateful you kept going."
+            },
+            {
+                "title": "SMALL WINS COMPOUND",
+                "line1": "One clean page of notes per day",
+                "line2": "becomes a full textbook in 1 year."
+            },
+            {
+                "title": "IT'S OKAY TO REST",
+                "line1": "Rest is part of the study plan, not a failure.",
+                "line2": "Tired brains don't store information well."
+            },
+        ]
+
+        # Learning Loop state
+        self.loop_index = 0
+        self.loop_phase = "fade_in"    # fade_in, hold, fade_out, dark_pause
+        self.loop_alpha = 0
+        self.loop_timer = 0.0
+
+        # Timing in seconds
+        self.loop_fade_duration = 3.0      # fade in/out
+        self.loop_hold_duration = 10.0     # fully visible
+        self.loop_dark_duration = 2.0      # wall goes quiet between cards
+
+    def reset_learning_loop(self):
+        """Reset Learning Loop animation state"""
+        self.loop_index = 0
+        self.loop_phase = "fade_in"
+        self.loop_alpha = 0
+        self.loop_timer = 0.0
 
     def handle_events(self):
         """Handle mode-specific input - overrides base class"""
@@ -137,14 +230,17 @@ class EducationDemo(MotiBeamScene):
                         self.start_time = pygame.time.get_ticks()
                         self.sleep_loop_start = None  # Reset fade animation timer
                     elif event.key == pygame.K_5:
-                        # Launch dedicated Learning Loop scene
-                        loop = EducationLearningLoop(standalone=False)
-                        loop.screen = self.screen
-                        loop.run(duration=300)  # Run for 5 minutes or until ESC
-                        # Don't change in_menu - stay in Education menu after loop exits
+                        # Enter Learning Loop mode (inline rendering)
+                        self.current_mode = "Learning Loop (Study Materials)"
+                        self.in_menu = False
+                        self.start_time = pygame.time.get_ticks()
+                        self.reset_learning_loop()
                 else:
                     # Inside a mode
                     if event.key == pygame.K_ESCAPE:
+                        # Reset loop state if exiting from Learning Loop (do this BEFORE clearing mode)
+                        if self.current_mode == "Learning Loop (Study Materials)":
+                            self.reset_learning_loop()
                         # Return to Education mode menu
                         self.in_menu = True
                         self.current_mode = None
@@ -211,6 +307,10 @@ class EducationDemo(MotiBeamScene):
             self.render_language_wall()
         elif self.current_mode == "Sleep Learning Loop":
             self.render_sleep_learning()
+        elif self.current_mode == "Learning Loop (Study Materials)":
+            # Calculate delta time for smooth FPS-independent animations
+            dt = self.clock.get_time() / 1000.0
+            self.render_learning_loop(dt)
 
     def render_mode_menu(self):
         """Render the mode selection menu"""
@@ -394,6 +494,76 @@ class EducationDemo(MotiBeamScene):
         footer_surf = self.font_tiny.render(footer, True, self.colors['muted'])
         footer_surf.set_alpha(120)
         footer_rect = footer_surf.get_rect(center=(self.width // 2, self.height - 40))
+        self.screen.blit(footer_surf, footer_rect)
+
+    def render_learning_loop(self, dt):
+        """Ambient study loop with smooth fades and dark pauses"""
+        # Update phase timers
+        self.loop_timer += dt
+
+        if self.loop_phase == "fade_in":
+            t = min(self.loop_timer / self.loop_fade_duration, 1.0)
+            self.loop_alpha = int(t * 255)
+            if t >= 1.0:
+                self.loop_phase = "hold"
+                self.loop_timer = 0.0
+
+        elif self.loop_phase == "hold":
+            self.loop_alpha = 255
+            if self.loop_timer >= self.loop_hold_duration:
+                self.loop_phase = "fade_out"
+                self.loop_timer = 0.0
+
+        elif self.loop_phase == "fade_out":
+            t = min(self.loop_timer / self.loop_fade_duration, 1.0)
+            self.loop_alpha = int((1.0 - t) * 255)
+            if t >= 1.0:
+                self.loop_phase = "dark_pause"
+                self.loop_timer = 0.0
+                self.loop_alpha = 0
+
+        elif self.loop_phase == "dark_pause":
+            self.loop_alpha = 0
+            if self.loop_timer >= self.loop_dark_duration:
+                # Move to next card
+                self.loop_index = (self.loop_index + 1) % len(self.learning_loop_items)
+                self.loop_phase = "fade_in"
+                self.loop_timer = 0.0
+
+        # Draw the current card with loop_alpha
+        self.screen.fill(self.colors['bg'])
+
+        item = self.learning_loop_items[self.loop_index]
+
+        # Draw onto a temporary surface so alpha applies to everything together
+        surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        surf.fill((0, 0, 0, 0))  # fully transparent background
+
+        # Title
+        title_text = f"LEARNING LOOP • {item['title']}"
+        title_surf = self.font_small.render(title_text, True, self.colors['accent'])
+        title_rect = title_surf.get_rect(center=(self.width // 2, self.height // 3))
+        surf.blit(title_surf, title_rect)
+
+        # Line 1 (main message)
+        line1_surf = self.font_large.render(item['line1'], True, self.colors['text'])
+        line1_rect = line1_surf.get_rect(center=(self.width // 2, self.height // 2))
+        surf.blit(line1_surf, line1_rect)
+
+        # Line 2 (support)
+        line2_surf = self.font_small.render(item['line2'], True, self.colors['muted'])
+        line2_rect = line2_surf.get_rect(center=(self.width // 2, self.height // 2 + 60))
+        surf.blit(line2_surf, line2_rect)
+
+        # Alpha fade – this is what makes it feel like whispering
+        surf.set_alpha(self.loop_alpha)
+        self.screen.blit(surf, (0, 0))
+
+        # Minimal footer hint (also faded)
+        footer = "ESC: Menu  •  Looping ambient study prompts"
+        footer_surf = self.font_tiny.render(footer, True, self.colors['muted'])
+        footer_rect = footer_surf.get_rect(center=(self.width // 2, self.height - 40))
+        footer_surf.set_alpha(self.loop_alpha)
         self.screen.blit(footer_surf, footer_rect)
 
 if __name__ == "__main__":
