@@ -15,9 +15,11 @@ APP_SCRIPT="${MOTIBEAM_DIR}/motibeam_app.py"
 # Ensure log directory exists
 mkdir -p "${LOG_DIR}"
 
-# Function to log with timestamp
+# Function to log with timestamp (uses basic shell redirects, no tee required)
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "${LOG_FILE}"
+    local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    echo "$msg"
+    echo "$msg" >> "${LOG_FILE}"
 }
 
 # Start logging
@@ -33,19 +35,24 @@ log "XAUTHORITY: ${XAUTHORITY}"
 log "PWD: $(pwd)"
 log "PATH: ${PATH}"
 
-# Check if X server is accessible
+# Check if X server is accessible (only if xset is available)
 log "Checking X server connection..."
-if xset q &>/dev/null; then
-    log "✓ X server connection successful"
-else
-    log "✗ WARNING: Cannot connect to X server!"
-    log "  This may cause pygame to fail. Waiting 5 seconds..."
-    sleep 5
+if command -v xset &>/dev/null; then
     if xset q &>/dev/null; then
-        log "✓ X server connection successful after delay"
+        log "✓ X server connection successful"
     else
-        log "✗ ERROR: Still cannot connect to X server"
+        log "✗ WARNING: Cannot connect to X server!"
+        log "  This may cause pygame to fail. Waiting 5 seconds..."
+        sleep 5
+        if xset q &>/dev/null; then
+            log "✓ X server connection successful after delay"
+        else
+            log "✗ ERROR: Still cannot connect to X server"
+        fi
     fi
+else
+    log "⚠ xset not found (install x11-xserver-utils to enable X server checks)"
+    log "  Attempting to continue anyway..."
 fi
 
 # Change to MotiBeam directory
@@ -73,9 +80,12 @@ log "Python executable: $(which python3)"
 
 # Check if pygame is available
 log "Checking pygame availability..."
-if python3 -c "import pygame; print('pygame version:', pygame.version.ver)" 2>&1 | tee -a "${LOG_FILE}"; then
+PYGAME_CHECK=$(python3 -c "import pygame; print('pygame version:', pygame.version.ver)" 2>&1)
+if [ $? -eq 0 ]; then
+    log "$PYGAME_CHECK"
     log "✓ pygame is available"
 else
+    log "$PYGAME_CHECK"
     log "✗ ERROR: pygame import failed!"
 fi
 
@@ -99,8 +109,14 @@ log "Command: python3 ${APP_SCRIPT}"
 log "----------------------------------------"
 
 # Run the application and capture exit code
-python3 "${APP_SCRIPT}" 2>&1 | tee -a "${LOG_FILE}"
-EXIT_CODE=$?
+# Redirect both stdout and stderr to log file while still showing on console
+python3 "${APP_SCRIPT}" 2>&1 | while IFS= read -r line; do
+    echo "$line"
+    echo "$line" >> "${LOG_FILE}"
+done
+
+# Capture the exit code from python3 (not from the while loop)
+EXIT_CODE=${PIPESTATUS[0]}
 
 # Log completion
 log "----------------------------------------"

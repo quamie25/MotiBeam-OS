@@ -28,8 +28,15 @@ Before configuring autostart, ensure:
 2. **Required packages are installed:**
    ```bash
    sudo apt-get update
-   sudo apt-get install -y python3-pygame xserver-xorg x11-xserver-utils
+   sudo apt-get install -y python3-pygame xserver-xorg
    ```
+
+   **Optional but recommended** (for X server connection diagnostics):
+   ```bash
+   sudo apt-get install -y x11-xserver-utils
+   ```
+
+   Note: The startup script will work without `x11-xserver-utils`, but won't be able to verify X server connectivity before launching.
 
 3. **The Pi auto-logs in to the desktop:**
    - Run `sudo raspi-config`
