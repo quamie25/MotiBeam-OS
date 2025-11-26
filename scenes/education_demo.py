@@ -73,43 +73,50 @@ class EducationDemo(MotiBeamScene):
         self.sleep_cycle_time = 0
         self.fact_display_duration = 10  # seconds per fact
 
-    def handle_events(self, event):
-        """Handle mode-specific input"""
-        if self.in_menu:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    self.current_mode = "Study Session"
-                    self.in_menu = False
-                    self.start_time = pygame.time.get_ticks()
-                elif event.key == pygame.K_2:
-                    self.current_mode = "Homework Wall"
-                    self.in_menu = False
-                    self.start_time = pygame.time.get_ticks()
-                elif event.key == pygame.K_3:
-                    self.current_mode = "Language Wall"
-                    self.in_menu = False
-                    self.start_time = pygame.time.get_ticks()
-                elif event.key == pygame.K_4:
-                    self.current_mode = "Sleep Learning Loop"
-                    self.in_menu = False
-                    self.start_time = pygame.time.get_ticks()
-                    self.sleep_cycle_time = time.time()
-        else:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    # Return to mode menu
-                    self.in_menu = True
-                    self.current_mode = None
-                elif self.current_mode == "Study Session":
-                    if event.key == pygame.K_LEFT:
-                        self.current_card = (self.current_card - 1) % len(self.study_items)
-                    elif event.key == pygame.K_RIGHT:
-                        self.current_card = (self.current_card + 1) % len(self.study_items)
-                elif self.current_mode == "Language Wall":
-                    if event.key == pygame.K_LEFT:
-                        self.current_vocab = (self.current_vocab - 1) % len(self.language_vocab)
-                    elif event.key == pygame.K_RIGHT:
-                        self.current_vocab = (self.current_vocab + 1) % len(self.language_vocab)
+    def handle_events(self):
+        """Handle mode-specific input - overrides base class"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if self.in_menu:
+                    # Mode selection menu
+                    if event.key == pygame.K_ESCAPE:
+                        # Exit to main MotiBeam menu
+                        self.running = False
+                    elif event.key == pygame.K_1:
+                        self.current_mode = "Study Session"
+                        self.in_menu = False
+                        self.start_time = pygame.time.get_ticks()
+                    elif event.key == pygame.K_2:
+                        self.current_mode = "Homework Wall"
+                        self.in_menu = False
+                        self.start_time = pygame.time.get_ticks()
+                    elif event.key == pygame.K_3:
+                        self.current_mode = "Language Wall"
+                        self.in_menu = False
+                        self.start_time = pygame.time.get_ticks()
+                    elif event.key == pygame.K_4:
+                        self.current_mode = "Sleep Learning Loop"
+                        self.in_menu = False
+                        self.start_time = pygame.time.get_ticks()
+                        self.sleep_cycle_time = time.time()
+                else:
+                    # Inside a mode
+                    if event.key == pygame.K_ESCAPE:
+                        # Return to Education mode menu
+                        self.in_menu = True
+                        self.current_mode = None
+                    elif self.current_mode == "Study Session":
+                        if event.key == pygame.K_LEFT:
+                            self.current_card = (self.current_card - 1) % len(self.study_items)
+                        elif event.key == pygame.K_RIGHT:
+                            self.current_card = (self.current_card + 1) % len(self.study_items)
+                    elif self.current_mode == "Language Wall":
+                        if event.key == pygame.K_LEFT:
+                            self.current_vocab = (self.current_vocab - 1) % len(self.language_vocab)
+                        elif event.key == pygame.K_RIGHT:
+                            self.current_vocab = (self.current_vocab + 1) % len(self.language_vocab)
 
     def update(self):
         """Update mode-specific logic"""
