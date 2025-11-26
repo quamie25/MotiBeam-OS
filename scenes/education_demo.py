@@ -496,6 +496,24 @@ class EducationDemo(MotiBeamScene):
         footer_rect = footer_surf.get_rect(center=(self.width // 2, self.height - 40))
         self.screen.blit(footer_surf, footer_rect)
 
+    def wrap_text(self, text, font, max_width):
+        """Return a list of lines so that each line fits within max_width."""
+        words = text.split()
+        lines = []
+        current = ""
+
+        for w in words:
+            test = f"{current} {w}".strip()
+            if font.size(test)[0] <= max_width:
+                current = test
+            else:
+                if current:
+                    lines.append(current)
+                current = w
+        if current:
+            lines.append(current)
+        return lines
+
     def render_learning_loop(self, dt):
         """Ambient study loop with smooth fades and dark pauses"""
         # Update phase timers
@@ -545,15 +563,35 @@ class EducationDemo(MotiBeamScene):
         title_rect = title_surf.get_rect(center=(self.width // 2, self.height // 3))
         surf.blit(title_surf, title_rect)
 
-        # Line 1 (main message)
-        line1_surf = self.font_large.render(item['line1'], True, self.colors['text'])
-        line1_rect = line1_surf.get_rect(center=(self.width // 2, self.height // 2))
-        surf.blit(line1_surf, line1_rect)
+        # Line 1 (main message) - wrapped to multiple centered lines
+        max_width_line1 = self.width - 160  # 80px padding on each side
 
-        # Line 2 (support)
-        line2_surf = self.font_small.render(item['line2'], True, self.colors['muted'])
-        line2_rect = line2_surf.get_rect(center=(self.width // 2, self.height // 2 + 60))
-        surf.blit(line2_surf, line2_rect)
+        # If the sentence is extremely long, drop one font size
+        font_line1 = self.font_large
+        if font_line1.size(item['line1'])[0] > max_width_line1:
+            font_line1 = self.font_medium
+
+        line1_wrapped = self.wrap_text(item['line1'], font_line1, max_width_line1)
+
+        # Start a bit above center, then step down per line
+        y_line1 = self.height // 2 - (len(line1_wrapped) * 20)
+        for line in line1_wrapped:
+            line_surf = font_line1.render(line, True, self.colors['text'])
+            line_rect = line_surf.get_rect(center=(self.width // 2, y_line1))
+            surf.blit(line_surf, line_rect)
+            y_line1 += 40
+
+        # Line 2 (support) - wrapped to multiple centered lines
+        max_width_line2 = self.width - 200  # 100px padding on each side for smaller text
+        line2_wrapped = self.wrap_text(item['line2'], self.font_small, max_width_line2)
+
+        # Position below line1
+        y_line2 = y_line1 + 20
+        for line in line2_wrapped:
+            line_surf = self.font_small.render(line, True, self.colors['muted'])
+            line_rect = line_surf.get_rect(center=(self.width // 2, y_line2))
+            surf.blit(line_surf, line_rect)
+            y_line2 += 35
 
         # Alpha fade – this is what makes it feel like whispering
         surf.set_alpha(self.loop_alpha)
