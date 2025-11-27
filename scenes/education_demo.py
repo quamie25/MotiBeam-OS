@@ -136,27 +136,21 @@ class EducationDemo(MotiBeamScene):
         self.last_sleep_toggle_time = 0.0
         self.last_key_time = pygame.time.get_ticks() / 1000.0
 
-        # Sleep mode "whispers" (facts, affirmations, teasers)
+        # Whispering sleep mode messages
         self.sleep_messages = [
-            # Knowledge
-            "Fun fact: Your brain keeps learning even while you rest.",
-            "Did you know? Short, focused study beats long, distracted sessions.",
-            "Memory strengthens during sleep — this break is part of the work.",
-            # Affirmations
-            "You are capable of understanding hard things.",
-            "Every small session compounds into mastery.",
-            "You're building a future self that will thank you.",
-            # Mind teasers (short & gentle)
-            "Teaser: Name 3 things you learned today.",
-            "Teaser: Explain today's topic in 1 sentence.",
-            "Teaser: If you had to teach this to a friend, where would you start?",
+            "You are safe. One breath at a time.",
+            "Your mind grows stronger, even in rest.",
+            "Relax your shoulders. Unclench your jaw.",
+            "Tiny steps today become big wins tomorrow.",
+            "Curiosity is your superpower.",
+            "Stillness restores clarity.",
+            "Your brain is learning beneath the silence.",
         ]
 
         self.sleep_msg_index = 0
-        self.sleep_msg_timer = 0.0
-        self.sleep_msg_interval = 10.0  # seconds per message
         self.sleep_msg_alpha = 0.0
-        self.sleep_msg_fade_in = True
+        self.sleep_msg_phase = "fade_in"  # fade_in → hold → fade_out
+        self.sleep_msg_timer = 0.0
 
         # Activity panel
         self.activity_visible = False
@@ -233,7 +227,7 @@ class EducationDemo(MotiBeamScene):
                     self.sleep_msg_index = 0
                     self.sleep_msg_timer = 0.0
                     self.sleep_msg_alpha = 0.0
-                    self.sleep_msg_fade_in = True
+                    self.sleep_msg_phase = "fade_in"
                 elif self.sleep_state == "soft":
                     if time_since_last_sleep_toggle < 0.5:
                         # Double-tap detected - enter deep sleep
@@ -383,38 +377,40 @@ class EducationDemo(MotiBeamScene):
                 self.card_slide_offset = 0.0
                 self.card_slide_direction = 0
 
-        # Sleep mode animations
+        # Sleep mode animations + whisper timing
         if self.sleep_state == "soft":
             # Breathing circle animation
-            self.breath_time += dt * 0.5  # Slow breathing cycle
+            self.breath_time += dt * 0.5
             if self.breath_time > math.tau:
                 self.breath_time -= math.tau
 
-            # Whisper text fade in/out
+            # Whisper timing logic
             self.sleep_msg_timer += dt
 
-            fade_speed = 0.5  # alpha per second
-            if self.sleep_msg_fade_in:
-                self.sleep_msg_alpha = min(1.0, self.sleep_msg_alpha + fade_speed * dt)
+            if self.sleep_msg_phase == "fade_in":
+                self.sleep_msg_alpha += dt / 1.0
                 if self.sleep_msg_alpha >= 1.0:
-                    # Hold fully visible for a bit before fading out
-                    if self.sleep_msg_timer >= self.sleep_msg_interval * 0.5:
-                        self.sleep_msg_fade_in = False
-            else:
-                self.sleep_msg_alpha = max(0.0, self.sleep_msg_alpha - fade_speed * dt)
-                if self.sleep_msg_alpha <= 0.0:
-                    # Move to next message and restart cycle
+                    self.sleep_msg_alpha = 1.0
+                    self.sleep_msg_phase = "hold"
                     self.sleep_msg_timer = 0.0
-                    self.sleep_msg_fade_in = True
+
+            elif self.sleep_msg_phase == "hold":
+                if self.sleep_msg_timer >= 4.0:
+                    self.sleep_msg_phase = "fade_out"
+                    self.sleep_msg_timer = 0.0
+
+            elif self.sleep_msg_phase == "fade_out":
+                self.sleep_msg_alpha -= dt / 1.0
+                if self.sleep_msg_alpha <= 0.0:
+                    self.sleep_msg_alpha = 0.0
+                    self.sleep_msg_phase = "fade_in"
+                    self.sleep_msg_timer = 0.0
                     self.sleep_msg_index = (self.sleep_msg_index + 1) % len(self.sleep_messages)
+
         elif self.sleep_state == "deep":
-            # Deep sleep pulse for dot
             self.sleep_pulse += dt * 1.5
             if self.sleep_pulse > math.tau:
                 self.sleep_pulse -= math.tau
-        else:
-            self.breath_time = 0.0
-            self.sleep_pulse = 0.0
 
         # Auto-sleep after 180 seconds of inactivity
         if self.sleep_state == "none" and self.timer_running:
@@ -427,7 +423,7 @@ class EducationDemo(MotiBeamScene):
                 self.sleep_msg_index = 0
                 self.sleep_msg_timer = 0.0
                 self.sleep_msg_alpha = 0.0
-                self.sleep_msg_fade_in = True
+                self.sleep_msg_phase = "fade_in"
 
         # Update timer (continues even in sleep mode)
         if self.timer_running and not self.timer_complete:
