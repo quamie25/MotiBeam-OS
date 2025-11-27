@@ -11,7 +11,7 @@ import pygame
 
 # Import all scenes
 from boot_screen import BootScreen
-from clinical_demo_enhanced import ClinicalWellnessEnhanced
+from clinical_wellness_scene import ClinicalWellnessScene
 from automotive_demo import AutomotiveDemo
 from emergency_demo import EmergencyDemo
 from industrial_demo import IndustrialDemo
@@ -193,7 +193,7 @@ class MotiBeamApp:
     def run_demo(self, demo_name):
         """Run selected demo"""
         demo_map = {
-            "clinical": ClinicalWellnessEnhanced,
+            "clinical": ClinicalWellnessScene,
             "education": EducationDemo,
             "automotive": AutomotiveDemo,
             "emergency": EmergencyDemo,
