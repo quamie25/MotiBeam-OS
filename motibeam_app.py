@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 MotiBeam OS - Master Application v3.0
-Professional boot sequence + menu system + 6 vertical demos
+Professional boot sequence + menu system + 7 vertical demos
 """
 
 import sys
@@ -17,6 +17,7 @@ from emergency_demo import EmergencyDemo
 from industrial_demo import IndustrialDemo
 from security_demo import SecurityDemo
 from education_demo import EducationDemo
+from home_demo import HomeDashboardScene
 
 class MotiBeamApp:
     """Main MotiBeam OS Application"""
@@ -61,7 +62,7 @@ class MotiBeamApp:
         """Display main menu and return selection"""
         clock = pygame.time.Clock()
         
-        # Menu items - REORDERED: Education is now #2
+        # Menu items - 7 vertical demos
         menu_items = [
             {"key": "1", "name": "Clinical & Wellness", "symbol": "[+]", "color": self.colors['green'], "demo": "clinical"},
             {"key": "2", "name": "Education/Learning", "symbol": "[#]", "color": self.colors['purple'], "demo": "education"},
@@ -69,6 +70,7 @@ class MotiBeamApp:
             {"key": "4", "name": "Emergency Systems", "symbol": "[!]", "color": self.colors['red'], "demo": "emergency"},
             {"key": "5", "name": "Enterprise/Industrial", "symbol": "[=]", "color": self.colors['cyan'], "demo": "industrial"},
             {"key": "6", "name": "Security/Government", "symbol": "[*]", "color": self.colors['orange'], "demo": "security"},
+            {"key": "7", "name": "Smart Home Dashboard", "symbol": "[◊]", "color": self.colors['blue'], "demo": "home"},
         ]
         
         selected = None
@@ -102,6 +104,9 @@ class MotiBeamApp:
                         menu_running = False
                     elif event.key == pygame.K_6:
                         selected = menu_items[5]["demo"]
+                        menu_running = False
+                    elif event.key == pygame.K_7:
+                        selected = menu_items[6]["demo"]
                         menu_running = False
                     elif event.key == pygame.K_a:
                         selected = "all"
@@ -144,9 +149,9 @@ class MotiBeamApp:
             menu_title_rect = menu_title.get_rect(centerx=self.width//2, top=230)  # Moved up from 270
             self.screen.blit(menu_title, menu_title_rect)
             
-            # Menu items with symbols - TIGHTER SPACING to fit all 6
-            y_pos = 310  # Starting position moved up from 360
-            y_spacing = 60  # Reduced from 75 to fit all 6 items
+            # Menu items with symbols - TIGHTER SPACING to fit all 7
+            y_pos = 295  # Starting position for 7 items
+            y_spacing = 52  # Spacing to fit all 7 items
             
             for i, item in enumerate(menu_items):
                 is_hovered = (i == hover_index)
@@ -165,15 +170,15 @@ class MotiBeamApp:
                 
                 y_pos += y_spacing
             
-            # "Run All" option - positioned below all 6 items
+            # "Run All" option - positioned below all 7 items
             all_y = y_pos + 10
             all_text = "A. [ALL] Run All Demos"
             all_surf = self.font_small.render(all_text, True, self.colors['white'])
             all_rect = all_surf.get_rect(center=(self.width//2, all_y))
             self.screen.blit(all_surf, all_rect)
-            
+
             # Footer
-            footer_text = "Press 1-6 or UP/DOWN + ENTER | A for all | ESC to exit"
+            footer_text = "Press 1-7 or UP/DOWN + ENTER | A for all | ESC to exit"
             footer_surf = self.font_small.render(footer_text, True, self.colors['gray'])
             footer_rect = footer_surf.get_rect(center=(self.width//2, self.height - 30))
             self.screen.blit(footer_surf, footer_rect)
@@ -199,6 +204,7 @@ class MotiBeamApp:
             "emergency": EmergencyDemo,
             "industrial": IndustrialDemo,
             "security": SecurityDemo,
+            "home": HomeDashboardScene,
         }
         
         if demo_name in demo_map:
@@ -209,12 +215,12 @@ class MotiBeamApp:
             print(f"{demo_name} demo completed.")
     
     def run_all_demos(self):
-        """Run all 6 demos in preferred order"""
-        demos = ["clinical", "education", "automotive", "emergency", "industrial", "security"]
+        """Run all 7 demos in preferred order"""
+        demos = ["clinical", "education", "automotive", "emergency", "industrial", "security", "home"]
         for i, demo_name in enumerate(demos):
             if not self.running:
                 break
-            print(f"Running demo {i+1}/6: {demo_name}")
+            print(f"Running demo {i+1}/7: {demo_name}")
             self.run_demo(demo_name)
     
     def run(self):
@@ -232,7 +238,7 @@ class MotiBeamApp:
             
             # Run selected demo(s)
             if selection == "all":
-                print("Running all 6 vertical demos in preferred order...")
+                print("Running all 7 vertical demos in preferred order...")
                 self.run_all_demos()
             elif selection:
                 self.run_demo(selection)
