@@ -136,6 +136,28 @@ class EducationDemo(MotiBeamScene):
         self.last_sleep_toggle_time = 0.0
         self.last_key_time = pygame.time.get_ticks() / 1000.0
 
+        # Sleep mode "whispers" (facts, affirmations, teasers)
+        self.sleep_messages = [
+            # Knowledge
+            "Fun fact: Your brain keeps learning even while you rest.",
+            "Did you know? Short, focused study beats long, distracted sessions.",
+            "Memory strengthens during sleep — this break is part of the work.",
+            # Affirmations
+            "You are capable of understanding hard things.",
+            "Every small session compounds into mastery.",
+            "You're building a future self that will thank you.",
+            # Mind teasers (short & gentle)
+            "Teaser: Name 3 things you learned today.",
+            "Teaser: Explain today's topic in 1 sentence.",
+            "Teaser: If you had to teach this to a friend, where would you start?",
+        ]
+
+        self.sleep_msg_index = 0
+        self.sleep_msg_timer = 0.0
+        self.sleep_msg_interval = 10.0  # seconds per message
+        self.sleep_msg_alpha = 0.0
+        self.sleep_msg_fade_in = True
+
         # Activity panel
         self.activity_visible = False
         self.activity_log = []
@@ -208,6 +230,10 @@ class EducationDemo(MotiBeamScene):
                 if self.sleep_state == "none":
                     self.sleep_state = "soft"
                     self._log("Sleep mode (soft) enabled")
+                    self.sleep_msg_index = 0
+                    self.sleep_msg_timer = 0.0
+                    self.sleep_msg_alpha = 0.0
+                    self.sleep_msg_fade_in = True
                 elif self.sleep_state == "soft":
                     if time_since_last_sleep_toggle < 0.5:
                         # Double-tap detected - enter deep sleep
@@ -363,6 +389,24 @@ class EducationDemo(MotiBeamScene):
             self.breath_time += dt * 0.5  # Slow breathing cycle
             if self.breath_time > math.tau:
                 self.breath_time -= math.tau
+
+            # Whisper text fade in/out
+            self.sleep_msg_timer += dt
+
+            fade_speed = 0.5  # alpha per second
+            if self.sleep_msg_fade_in:
+                self.sleep_msg_alpha = min(1.0, self.sleep_msg_alpha + fade_speed * dt)
+                if self.sleep_msg_alpha >= 1.0:
+                    # Hold fully visible for a bit before fading out
+                    if self.sleep_msg_timer >= self.sleep_msg_interval * 0.5:
+                        self.sleep_msg_fade_in = False
+            else:
+                self.sleep_msg_alpha = max(0.0, self.sleep_msg_alpha - fade_speed * dt)
+                if self.sleep_msg_alpha <= 0.0:
+                    # Move to next message and restart cycle
+                    self.sleep_msg_timer = 0.0
+                    self.sleep_msg_fade_in = True
+                    self.sleep_msg_index = (self.sleep_msg_index + 1) % len(self.sleep_messages)
         elif self.sleep_state == "deep":
             # Deep sleep pulse for dot
             self.sleep_pulse += dt * 1.5
@@ -380,6 +424,10 @@ class EducationDemo(MotiBeamScene):
                 self.sleep_state = "soft"
                 self._log("Auto sleep enabled after 3 minutes of inactivity")
                 self.last_key_time = current_time  # Reset to avoid repeated triggers
+                self.sleep_msg_index = 0
+                self.sleep_msg_timer = 0.0
+                self.sleep_msg_alpha = 0.0
+                self.sleep_msg_fade_in = True
 
         # Update timer (continues even in sleep mode)
         if self.timer_running and not self.timer_complete:
@@ -455,6 +503,15 @@ class EducationDemo(MotiBeamScene):
             breath_text_surf.set_alpha(120)
             breath_text_rect = breath_text_surf.get_rect(center=(self.width // 2, self.height // 2 + 40))
             self.screen.blit(breath_text_surf, breath_text_rect)
+
+            # Whisper text – gentle, centered, fading
+            message = self.sleep_messages[self.sleep_msg_index]
+            # Use medium font so it's readable but not overwhelming
+            text_surf = self.font_small.render(message, True, self.colors['white'])
+            text_surf.set_alpha(int(255 * self.sleep_msg_alpha))
+
+            text_rect = text_surf.get_rect(center=(self.width // 2, self.height // 2 + 80))
+            self.screen.blit(text_surf, text_rect)
 
             # Apply fade effect
             if self.fade_alpha < 255:
