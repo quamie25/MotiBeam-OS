@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-VERTICAL 2: Education / Learning Demo - Enhanced
-Multi-deck flashcard system with Pomodoro timer and quiz mode
+VERTICAL 2: Education / Learning Demo v2.0
+Focused flashcard system with subject/level hierarchy and Pomodoro timer
 """
 
 import sys
@@ -13,72 +13,112 @@ import math
 from datetime import datetime
 
 class EducationDemo(MotiBeamScene):
-    """Enhanced education scene with multi-deck flashcards and Pomodoro timer"""
+    """Focused education scene with subject/level flashcards and Pomodoro timer"""
 
     def __init__(self, standalone=True):
-        super().__init__(title="MotiBeam - Education & Learning", standalone=standalone)
+        super().__init__(title="MotiBeam - Education & Learning v2.0", standalone=standalone)
 
-        # Layout constants to prevent text overlap
-        self.card_width = 520
-        self.card_x = self.width // 2 - self.card_width // 2 - 80  # Shift card left
-        self.activity_x = self.card_x + self.card_width + 40
-        self.activity_width = self.width - self.activity_x - 40
-
-        # Card decks - 5 decks total
-        self.decks = [
+        # Subject/Level hierarchy
+        self.subjects = [
             {
                 "name": "Biology",
-                "short": "Bio",
-                "color": self.colors["green"],
-                "cards": [
-                    {"term": "Photosynthesis", "definition": "Process by which plants convert light into energy"},
-                    {"term": "DNA", "definition": "Deoxyribonucleic acid - molecule carrying genetic instructions"},
-                    {"term": "Cell", "definition": "Basic structural and functional unit of all living organisms"},
-                ],
+                "theme_color": self.colors["green"],
+                "levels": [
+                    {
+                        "name": "General Biology",
+                        "cards": [
+                            {"term": "Photosynthesis", "definition": "Process by which plants convert light energy into chemical energy"},
+                            {"term": "DNA", "definition": "Deoxyribonucleic acid carrying genetic instructions for life"},
+                            {"term": "Cell", "definition": "Basic structural and functional unit of all living organisms"},
+                        ]
+                    }
+                ]
             },
             {
                 "name": "Physics",
-                "short": "Physics",
-                "color": self.colors["yellow"],
-                "cards": [
-                    {"term": "Gravity", "definition": "Force that attracts objects with mass toward each other"},
-                    {"term": "Force", "definition": "Push or pull on an object resulting from interaction"},
-                    {"term": "Energy", "definition": "Capacity to do work or produce change"},
-                ],
+                "theme_color": self.colors["yellow"],
+                "levels": [
+                    {
+                        "name": "General Physics",
+                        "cards": [
+                            {"term": "Gravity", "definition": "Force that attracts objects with mass toward each other"},
+                            {"term": "Force", "definition": "Push or pull on an object resulting from interaction"},
+                            {"term": "Energy", "definition": "Capacity to do work or produce change in a system"},
+                        ]
+                    }
+                ]
             },
             {
                 "name": "History",
-                "short": "History",
-                "color": self.colors["purple"],
-                "cards": [
-                    {"term": "Renaissance", "definition": "Cultural rebirth in Europe from 14th to 17th century"},
-                    {"term": "Industrial Revolution", "definition": "Period of major industrialization in late 1700s-1800s"},
-                    {"term": "Civil Rights Movement", "definition": "1950s-60s struggle for racial equality in America"},
-                ],
+                "theme_color": self.colors["purple"],
+                "levels": [
+                    {
+                        "name": "World History",
+                        "cards": [
+                            {"term": "Renaissance", "definition": "Cultural rebirth in Europe from 14th to 17th century"},
+                            {"term": "Industrial Revolution", "definition": "Period of major industrialization in late 1700s to 1800s"},
+                            {"term": "Civil Rights Movement", "definition": "1950s-60s struggle for racial equality in America"},
+                        ]
+                    }
+                ]
             },
             {
-                "name": "Math Problems",
-                "short": "Math",
-                "color": self.colors["orange"],
-                "cards": [
-                    {"term": "Train Meeting Problem", "definition": "Two trains are 120 miles apart and travel toward each other at 40 mph and 20 mph. How long until they meet?"},
-                    {"term": "Rectangle Area", "definition": "A rectangle has a length twice its width. If the perimeter is 36 units, what is the area?"},
-                    {"term": "Discount & Tax", "definition": "A $50 item is discounted by 20% and then taxed at 8%. What is the final price?"},
-                ],
+                "name": "Math",
+                "theme_color": self.colors["orange"],
+                "levels": [
+                    {
+                        "name": "5th Grade Math",
+                        "cards": [
+                            {"term": "Pizza Slices", "definition": "A pizza is cut into 8 slices. If you eat 3 slices, what fraction of the pizza remains?"},
+                            {"term": "Garden Perimeter", "definition": "A square garden has sides of 12 feet. What is the perimeter?"},
+                            {"term": "Movie Time", "definition": "A movie starts at 2:45 PM and runs for 1 hour 50 minutes. When does it end?"},
+                        ]
+                    },
+                    {
+                        "name": "6th Grade Math",
+                        "cards": [
+                            {"term": "Train Meeting", "definition": "Two trains 120 miles apart travel toward each other at 40 mph and 20 mph. How long until they meet?"},
+                            {"term": "Rectangle Area", "definition": "A rectangle has length twice its width. If perimeter is 36 units, what is the area?"},
+                            {"term": "Discount & Tax", "definition": "A $50 item is discounted 20% then taxed at 8%. What is the final price?"},
+                        ]
+                    },
+                ]
             },
             {
-                "name": "Vocab Builder",
-                "short": "Vocab",
-                "color": self.colors["cyan"],
-                "cards": [
-                    {"term": "Resilient", "definition": "Able to withstand or recover quickly from difficult conditions."},
-                    {"term": "Innovative", "definition": "Featuring new methods; advanced and original."},
-                    {"term": "Disciplined", "definition": "Showing controlled behavior and consistent effort over time."},
-                ],
+                "name": "Vocabulary",
+                "theme_color": self.colors["cyan"],
+                "levels": [
+                    {
+                        "name": "Middle School Vocab",
+                        "cards": [
+                            {"term": "Eager", "definition": "Showing keen interest or enthusiasm"},
+                            {"term": "Reliable", "definition": "Consistently good in quality or performance; dependable"},
+                            {"term": "Fortunate", "definition": "Favored by or involving good luck; lucky"},
+                        ]
+                    },
+                    {
+                        "name": "High School Vocab",
+                        "cards": [
+                            {"term": "Resilient", "definition": "Able to withstand or recover quickly from difficult conditions"},
+                            {"term": "Innovative", "definition": "Featuring new methods; advanced and original"},
+                            {"term": "Pragmatic", "definition": "Dealing with things sensibly and realistically"},
+                        ]
+                    },
+                    {
+                        "name": "College / Higher Ed Vocab",
+                        "cards": [
+                            {"term": "Ubiquitous", "definition": "Present, appearing, or found everywhere; omnipresent"},
+                            {"term": "Ephemeral", "definition": "Lasting for a very short time; transient"},
+                            {"term": "Intrepid", "definition": "Fearless; adventurous, often in challenging situations"},
+                        ]
+                    },
+                ]
             },
         ]
 
-        self.current_deck_index = 0  # Start with Biology
+        # Current position in hierarchy
+        self.current_subject_index = 0
+        self.current_level_index = 0
         self.current_card_index = 0
 
         # Timer state (Pomodoro-style)
@@ -88,115 +128,158 @@ class EducationDemo(MotiBeamScene):
 
         # Quiz mode
         self.quiz_mode = False
-        self.definition_visible = True
 
         # Sleep mode
         self.sleep_mode = False
         self.sleep_pulse = 0.0
 
+        # Activity panel
+        self.activity_visible = False
+        self.activity_log = []
+        self.max_activities = 3
+
         # Card transition animation
-        self.card_slide_offset = 0.0  # Horizontal offset for slide animation
-        self.card_slide_direction = 0  # 1 = from right, -1 = from left, 0 = no animation
-        self.card_slide_duration = 0.25  # 0.25 seconds
+        self.card_slide_offset = 0.0
+        self.card_slide_direction = 0  # 1 = right, -1 = left, 0 = none
+        self.card_slide_duration = 0.25
         self.card_slide_timer = 0.0
 
         # Animation state
-        self.fade_alpha = 0  # For fade-in effect (0 to 255)
+        self.fade_alpha = 0
         self.fade_in_complete = False
         self.fade_out = False
         self.animation_time = 0
 
-        # Activity feed
-        self.activity_log = []
-        self.max_activities = 4
+        # Initial log
         self._log("Session started")
-        self._log(f"Loaded {self.decks[0]['name']} deck")
+        subject = self._get_current_subject()
+        level = self._get_current_level()
+        self._log(f"{subject['name']} - {level['name']}")
 
     def _log(self, message):
         """Add timestamped activity to log"""
-        timestamp = datetime.now().strftime("%I:%M:%S %p")
-        self.activity_log.insert(0, f"{timestamp} - {message}")
+        timestamp = datetime.now().strftime("%I:%M %p")
+        self.activity_log.insert(0, f"{timestamp} {message}")
         if len(self.activity_log) > self.max_activities:
             self.activity_log = self.activity_log[:self.max_activities]
 
-    def _get_current_deck(self):
-        """Get the current deck"""
-        return self.decks[self.current_deck_index]
+    def _get_current_subject(self):
+        """Get the current subject"""
+        return self.subjects[self.current_subject_index]
+
+    def _get_current_level(self):
+        """Get the current level"""
+        subject = self._get_current_subject()
+        return subject["levels"][self.current_level_index]
 
     def _get_current_card(self):
         """Get the current flashcard"""
-        deck = self._get_current_deck()
-        return deck["cards"][self.current_card_index]
+        level = self._get_current_level()
+        return level["cards"][self.current_card_index]
 
-    def _get_deck_color(self):
-        """Get color for current deck"""
-        return self._get_current_deck()["color"]
+    def _get_theme_color(self):
+        """Get theme color for current subject"""
+        return self._get_current_subject()["theme_color"]
 
     def _start_card_transition(self, direction):
         """Start a card slide transition animation"""
-        self.card_slide_direction = direction  # 1 = from right, -1 = from left
+        self.card_slide_direction = direction
         self.card_slide_timer = 0.0
-        self.card_slide_offset = direction * 300  # Start 300px off-screen
+        self.card_slide_offset = direction * 300
 
     def handle_events(self, event):
         """Handle individual pygame event"""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                # Start fade-out animation
                 self.fade_out = True
-                self._log("Exiting session...")
+                self._log("Exiting...")
 
-            # Deck selection (keys 1-5)
+            # Subject selection (1-5)
             elif event.key == pygame.K_1:
-                self.current_deck_index = 0
+                self.current_subject_index = 0
+                self.current_level_index = 0
                 self.current_card_index = 0
-                self._log(f"Switched to {self.decks[0]['name']} deck")
+                subject = self._get_current_subject()
+                level = self._get_current_level()
+                self._log(f"{subject['name']} - {level['name']}")
             elif event.key == pygame.K_2:
-                self.current_deck_index = 1
+                self.current_subject_index = 1
+                self.current_level_index = 0
                 self.current_card_index = 0
-                self._log(f"Switched to {self.decks[1]['name']} deck")
+                subject = self._get_current_subject()
+                level = self._get_current_level()
+                self._log(f"{subject['name']} - {level['name']}")
             elif event.key == pygame.K_3:
-                self.current_deck_index = 2
+                self.current_subject_index = 2
+                self.current_level_index = 0
                 self.current_card_index = 0
-                self._log(f"Switched to {self.decks[2]['name']} deck")
+                subject = self._get_current_subject()
+                level = self._get_current_level()
+                self._log(f"{subject['name']} - {level['name']}")
             elif event.key == pygame.K_4:
-                self.current_deck_index = 3
+                self.current_subject_index = 3
+                self.current_level_index = 0
                 self.current_card_index = 0
-                self._log(f"Switched to {self.decks[3]['name']} deck")
+                subject = self._get_current_subject()
+                level = self._get_current_level()
+                self._log(f"{subject['name']} - {level['name']}")
             elif event.key == pygame.K_5:
-                self.current_deck_index = 4
+                self.current_subject_index = 4
+                self.current_level_index = 0
                 self.current_card_index = 0
-                self._log(f"Switched to {self.decks[4]['name']} deck")
+                subject = self._get_current_subject()
+                level = self._get_current_level()
+                self._log(f"{subject['name']} - {level['name']}")
 
-            # Card navigation with slide animation
+            # Level selection (UP/DOWN)
+            elif event.key == pygame.K_UP:
+                subject = self._get_current_subject()
+                num_levels = len(subject["levels"])
+                self.current_level_index = (self.current_level_index - 1) % num_levels
+                self.current_card_index = 0
+                level = self._get_current_level()
+                self._log(f"Level: {level['name']}")
+            elif event.key == pygame.K_DOWN:
+                subject = self._get_current_subject()
+                num_levels = len(subject["levels"])
+                self.current_level_index = (self.current_level_index + 1) % num_levels
+                self.current_card_index = 0
+                level = self._get_current_level()
+                self._log(f"Level: {level['name']}")
+
+            # Card navigation
             elif event.key == pygame.K_n or event.key == pygame.K_RIGHT:
-                deck = self._get_current_deck()
-                self.current_card_index = (self.current_card_index + 1) % len(deck["cards"])
+                level = self._get_current_level()
+                self.current_card_index = (self.current_card_index + 1) % len(level["cards"])
                 card = self._get_current_card()
-                self._log(f"Card {self.current_card_index + 1}/{len(deck['cards'])} - {card['term']}")
-                self._start_card_transition(1)  # Slide from right
+                self._log(f"Card: {card['term']}")
+                self._start_card_transition(1)
             elif event.key == pygame.K_p or event.key == pygame.K_LEFT:
-                deck = self._get_current_deck()
-                self.current_card_index = (self.current_card_index - 1) % len(deck["cards"])
+                level = self._get_current_level()
+                self.current_card_index = (self.current_card_index - 1) % len(level["cards"])
                 card = self._get_current_card()
-                self._log(f"Card {self.current_card_index + 1}/{len(deck['cards'])} - {card['term']}")
-                self._start_card_transition(-1)  # Slide from left
+                self._log(f"Card: {card['term']}")
+                self._start_card_transition(-1)
 
             # Quiz mode toggle
             elif event.key == pygame.K_f or event.key == pygame.K_SPACE:
                 self.quiz_mode = not self.quiz_mode
-                if self.quiz_mode:
-                    self.definition_visible = False
-                    self._log("Quiz mode ON")
-                else:
-                    self.definition_visible = True
-                    self._log("Quiz mode OFF")
+                mode_text = "ON" if self.quiz_mode else "OFF"
+                self._log(f"Quiz mode {mode_text}")
+
+            # Activity panel toggle
+            elif event.key == pygame.K_a:
+                self.activity_visible = not self.activity_visible
+                status = "shown" if self.activity_visible else "hidden"
+                self._log(f"Activity {status}")
 
             # Sleep mode toggle
             elif event.key == pygame.K_s:
                 self.sleep_mode = not self.sleep_mode
-                mode_text = "enabled" if self.sleep_mode else "disabled"
-                self._log(f"Sleep mode {mode_text}")
+                if self.sleep_mode:
+                    self._log("Sleep mode enabled")
+                else:
+                    self._log("Sleep mode disabled")
 
             # Timer controls
             elif event.key == pygame.K_t:
@@ -209,55 +292,52 @@ class EducationDemo(MotiBeamScene):
                 self.timer_seconds = 25 * 60
                 self.timer_complete = False
                 self.timer_running = False
-                self._log("Session restarted")
+                self._log("Timer reset")
 
     def update(self, dt):
         """Update scene state with delta time"""
         # Update animation time
         self.animation_time += dt
 
-        # Fade-in animation (0.7 seconds)
+        # Fade-in animation
         if not self.fade_in_complete:
             self.fade_alpha = min(255, self.fade_alpha + (255 * dt / 0.7))
             if self.fade_alpha >= 255:
                 self.fade_in_complete = True
 
-        # Fade-out animation (0.5 seconds)
+        # Fade-out animation
         if self.fade_out:
             self.fade_alpha = max(0, self.fade_alpha - (255 * dt / 0.5))
             if self.fade_alpha <= 0:
                 self.running = False
 
-        # Update card slide animation
+        # Card slide animation
         if self.card_slide_direction != 0:
             self.card_slide_timer += dt
-            # Ease-out animation
             progress = min(1.0, self.card_slide_timer / self.card_slide_duration)
-            # Smooth easing function
-            eased_progress = 1.0 - (1.0 - progress) ** 3
+            eased_progress = 1.0 - (1.0 - progress) ** 3  # Cubic ease-out
             self.card_slide_offset = self.card_slide_direction * 300 * (1.0 - eased_progress)
 
-            # End animation when complete
             if progress >= 1.0:
                 self.card_slide_offset = 0.0
                 self.card_slide_direction = 0
 
-        # Update sleep mode pulse
+        # Sleep mode pulse
         if self.sleep_mode:
-            self.sleep_pulse += dt * 2.0
+            self.sleep_pulse += dt * 1.5
             if self.sleep_pulse > math.tau:
                 self.sleep_pulse -= math.tau
         else:
             self.sleep_pulse = 0.0
 
-        # Update timer
+        # Update timer (continues even in sleep mode)
         if self.timer_running and not self.timer_complete:
             self.timer_seconds -= dt
             if self.timer_seconds <= 0:
                 self.timer_seconds = 0
                 self.timer_complete = True
                 self.timer_running = False
-                self._log("Session completed - take a break!")
+                self._log("Session complete!")
 
     def _wrap_text(self, text, font, max_width):
         """Wrap text to fit within max_width, returning list of lines"""
@@ -285,166 +365,179 @@ class EducationDemo(MotiBeamScene):
         """Render the scene"""
         self.screen.fill(self.colors['black'])
 
-        # Get current deck info
-        deck = self._get_current_deck()
-        deck_color = self._get_deck_color()
+        # Get current context
+        subject = self._get_current_subject()
+        level = self._get_current_level()
         card = self._get_current_card()
+        theme_color = self._get_theme_color()
 
-        # Header - Title
-        title_text = "BREAK TIME" if self.timer_complete else "📚 STUDY SESSION"
-        title_color = self.colors['orange'] if self.timer_complete else self.colors['green']
+        # Sleep mode overlay - draw and return early
+        if self.sleep_mode:
+            # Semi-transparent overlay
+            overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            base_alpha = 200
+            overlay.fill((0, 0, 0, base_alpha))
+            self.screen.blit(overlay, (0, 0))
 
-        # Add pulsing effect when timer complete
-        if self.timer_complete:
-            pulse = abs(math.sin(self.animation_time * 2))
-            title_alpha = int(180 + 75 * pulse)
-            title_surf = self.font_large.render(title_text, True, title_color)
-            title_surf.set_alpha(title_alpha)
-        else:
-            title_surf = self.font_large.render(title_text, True, title_color)
+            # Sleep mode title
+            title_surf = self.font_large.render("SLEEP MODE", True, theme_color)
+            title_rect = title_surf.get_rect(center=(self.width // 2, self.height // 2 - 50))
+            self.screen.blit(title_surf, title_rect)
 
-        title_rect = title_surf.get_rect(centerx=self.width//2, top=40)
-        self.screen.blit(title_surf, title_rect)
+            # Message
+            msg = "Screen dimmed · Rest your eyes · Press S to resume"
+            msg_surf = self.font_small.render(msg, True, self.colors["gray"])
+            msg_rect = msg_surf.get_rect(center=(self.width // 2, self.height // 2 + 10))
+            self.screen.blit(msg_surf, msg_rect)
 
-        # Subtitle - Deck indicator
-        deck_info = f"Deck: {deck['name']} ({self.current_deck_index + 1}/{len(self.decks)}) | 1=Bio 2=Physics 3=History 4=Math 5=Vocab"
-        deck_surf = self.font_small.render(deck_info, True, self.colors['white'])
-        deck_rect = deck_surf.get_rect(centerx=self.width//2, top=130)
-        self.screen.blit(deck_surf, deck_rect)
+            # Subtle pulsing dot
+            pulse_alpha = int(100 + 100 * abs(math.sin(self.sleep_pulse)))
+            pulse_surf = pygame.Surface((12, 12), pygame.SRCALPHA)
+            pygame.draw.circle(pulse_surf, (*theme_color, pulse_alpha), (6, 6), 6)
+            pulse_rect = pulse_surf.get_rect(center=(self.width // 2, self.height // 2 + 60))
+            self.screen.blit(pulse_surf, pulse_rect)
 
-        # Timer display (center top)
+            # Apply fade effect
+            if self.fade_alpha < 255:
+                fade_surface = pygame.Surface((self.width, self.height))
+                fade_surface.set_alpha(255 - int(self.fade_alpha))
+                fade_surface.fill(self.colors['black'])
+                self.screen.blit(fade_surface, (0, 0))
+
+            return  # Skip rendering everything else
+
+        # Main header - Level name (large)
+        header_text = level["name"].upper()
+        header_surf = self.font_large.render(header_text, True, theme_color)
+        header_rect = header_surf.get_rect(centerx=self.width // 2, top=30)
+        self.screen.blit(header_surf, header_rect)
+
+        # Subtitle - Subject and stats
+        num_levels = len(subject["levels"])
+        num_cards = len(level["cards"])
+        subtitle = f"Subject: {subject['name']} · Level: {level['name']} · Cards: {num_cards}"
+        subtitle_surf = self.font_small.render(subtitle, True, self.colors['white'])
+        subtitle_rect = subtitle_surf.get_rect(centerx=self.width // 2, top=90)
+        self.screen.blit(subtitle_surf, subtitle_rect)
+
+        # Timer (above card, smaller and subtle)
+        timer_y = 140
         minutes = int(self.timer_seconds // 60)
         seconds = int(self.timer_seconds % 60)
         timer_text = f"{minutes:02d}:{seconds:02d}"
 
-        # Add subtle pulse to timer
-        timer_pulse = 1.0 + 0.05 * abs(math.sin(self.animation_time * 2))
-        timer_font = pygame.font.Font(None, int(140 * timer_pulse))
-        timer_surf = timer_font.render(timer_text, True, title_color)
-        timer_rect = timer_surf.get_rect(centerx=self.width//2, top=200)
+        # Very subtle pulse on timer
+        timer_pulse = 1.0 + 0.02 * abs(math.sin(self.animation_time * 2))
+        timer_color = self.colors['orange'] if self.timer_complete else self.colors['cyan']
+        timer_font = pygame.font.Font(None, int(80 * timer_pulse))
+        timer_surf = timer_font.render(timer_text, True, timer_color)
+        timer_rect = timer_surf.get_rect(centerx=self.width // 2, top=timer_y)
         self.screen.blit(timer_surf, timer_rect)
 
-        # Timer status
-        if self.timer_running:
-            status_text = "⏸ T to pause | R to reset"
-        else:
-            status_text = "▶ T to start | R to reset"
-        status_surf = self.font_small.render(status_text, True, self.colors['gray'])
-        status_rect = status_surf.get_rect(centerx=self.width//2, top=330)
-        self.screen.blit(status_surf, status_rect)
+        # Timer controls
+        timer_help = "T to start | R to reset"
+        timer_help_surf = self.font_small.render(timer_help, True, self.colors['gray'])
+        timer_help_rect = timer_help_surf.get_rect(centerx=self.width // 2, top=timer_y + 75)
+        self.screen.blit(timer_help_surf, timer_help_rect)
 
-        # Flashcard area with slide animation (using layout constants)
-        card_y_start = 390
-        card_x_center = self.card_x + self.card_width // 2 + int(self.card_slide_offset)
+        # Flashcard - centered in middle third of screen
+        card_y_start = 280
+        card_width = 700
+        card_height = 260
+        card_x = (self.width - card_width) // 2 + int(self.card_slide_offset)
 
-        # Card border (with quiz mode pulse)
-        card_border_rect = pygame.Rect(
-            self.card_x + int(self.card_slide_offset),
-            card_y_start - 20,
-            self.card_width,
-            220
-        )
+        # Card background and border
+        card_rect = pygame.Rect(card_x, card_y_start, card_width, card_height)
+
+        # Draw card background
+        pygame.draw.rect(self.screen, (20, 20, 20), card_rect, border_radius=16)
+
+        # Draw border
         border_width = 3
         if self.quiz_mode:
             quiz_pulse = abs(math.sin(self.animation_time * 3))
-            border_width = int(3 + quiz_pulse * 3)
-            border_color = tuple(int(c * (0.7 + 0.3 * quiz_pulse)) for c in deck_color)
+            border_width = int(3 + quiz_pulse * 2)
+            border_color = tuple(int(c * (0.7 + 0.3 * quiz_pulse)) for c in theme_color)
         else:
-            border_color = deck_color
+            border_color = theme_color
+        pygame.draw.rect(self.screen, border_color, card_rect, border_width, border_radius=16)
 
-        pygame.draw.rect(self.screen, border_color, card_border_rect, border_width, border_radius=12)
+        # Term
+        term_label = "TERM"
+        term_label_surf = self.font_small.render(term_label, True, theme_color)
+        term_label_rect = term_label_surf.get_rect(centerx=self.width // 2, top=card_y_start + 20)
+        self.screen.blit(term_label_surf, term_label_rect)
 
-        # Term label
-        term_label = self.font_small.render("TERM:", True, deck_color)
-        term_label_rect = term_label.get_rect(centerx=card_x_center, top=card_y_start)
-        self.screen.blit(term_label, term_label_rect)
-
-        # Term text
-        term_surf = self.font_large.render(card['term'], True, self.colors['white'])
-        term_rect = term_surf.get_rect(centerx=card_x_center, top=card_y_start + 50)
+        term_surf = self.font_medium.render(card['term'], True, self.colors['white'])
+        term_rect = term_surf.get_rect(centerx=self.width // 2, top=card_y_start + 55)
         self.screen.blit(term_surf, term_rect)
 
-        # Definition (shown or hidden based on quiz mode)
-        if self.quiz_mode and not self.definition_visible:
+        # Definition
+        def_y = card_y_start + 120
+        if self.quiz_mode:
             # Show hint in quiz mode
-            def_text = "Press F or SPACE to reveal"
-            def_color = self.colors['gray']
-            def_font = self.font_small
-            def_surf = def_font.render(def_text, True, def_color)
-            def_rect = def_surf.get_rect(centerx=card_x_center, top=card_y_start + 180)
-            self.screen.blit(def_surf, def_rect)
+            hint_text = "Press F or SPACE to reveal"
+            hint_surf = self.font_small.render(hint_text, True, self.colors['gray'])
+            hint_rect = hint_surf.get_rect(centerx=self.width // 2, top=def_y + 40)
+            self.screen.blit(hint_surf, hint_rect)
         else:
-            # Definition label
-            def_label = self.font_small.render("DEFINITION:", True, deck_color)
-            def_label_rect = def_label.get_rect(centerx=card_x_center, top=card_y_start + 140)
-            self.screen.blit(def_label, def_label_rect)
+            # Show definition
+            def_label = "DEFINITION"
+            def_label_surf = self.font_small.render(def_label, True, theme_color)
+            def_label_rect = def_label_surf.get_rect(centerx=self.width // 2, top=def_y)
+            self.screen.blit(def_label_surf, def_label_rect)
 
-            # Definition text with word wrapping (card_width - 80px padding)
-            max_def_width = self.card_width - 80
-            def_font = pygame.font.Font(None, 34)  # Adjusted font size
+            # Wrap definition text
+            max_def_width = card_width - 100
+            def_font = pygame.font.Font(None, 32)
             wrapped_lines = self._wrap_text(card['definition'], def_font, max_def_width)
 
-            # Draw wrapped lines (max 2 lines)
-            line_y = card_y_start + 175
-            for line in wrapped_lines[:2]:
+            # Draw up to 3 lines
+            line_y = def_y + 35
+            for line in wrapped_lines[:3]:
                 line_surf = def_font.render(line, True, self.colors['white'])
-                line_rect = line_surf.get_rect(centerx=card_x_center, top=line_y)
+                line_rect = line_surf.get_rect(centerx=self.width // 2, top=line_y)
                 self.screen.blit(line_surf, line_rect)
-                line_y += 30
+                line_y += 28
 
-        # Progress bar
-        progress_y = card_y_start + 240
-        progress_width = min(self.card_width - 40, 500)
-        progress_x = card_x_center - progress_width // 2
+        # Progress bar (below card)
+        progress_y = card_y_start + card_height + 25
+        progress_width = 500
+        progress_x = (self.width - progress_width) // 2
 
-        # Background bar
-        progress_bg = pygame.Rect(progress_x, progress_y, progress_width, 12)
-        pygame.draw.rect(self.screen, (40, 40, 40), progress_bg, border_radius=6)
+        # Background
+        progress_bg = pygame.Rect(progress_x, progress_y, progress_width, 10)
+        pygame.draw.rect(self.screen, (40, 40, 40), progress_bg, border_radius=5)
 
-        # Fill bar
-        progress = (self.current_card_index + 1) / len(deck["cards"])
+        # Fill
+        progress = (self.current_card_index + 1) / num_cards
         fill_width = int(progress_width * progress)
         if fill_width > 0:
-            progress_fill = pygame.Rect(progress_x, progress_y, fill_width, 12)
-            pygame.draw.rect(self.screen, deck_color, progress_fill, border_radius=6)
+            progress_fill = pygame.Rect(progress_x, progress_y, fill_width, 10)
+            pygame.draw.rect(self.screen, theme_color, progress_fill, border_radius=5)
 
         # Border
-        pygame.draw.rect(self.screen, deck_color, progress_bg, 2, border_radius=6)
+        pygame.draw.rect(self.screen, theme_color, progress_bg, 2, border_radius=5)
 
         # Card counter
-        counter_text = f"Card {self.current_card_index + 1} of {len(deck['cards'])}"
+        counter_text = f"Card {self.current_card_index + 1} of {num_cards}"
         counter_surf = self.font_small.render(counter_text, True, self.colors['gray'])
-        counter_rect = counter_surf.get_rect(centerx=card_x_center, top=progress_y + 25)
+        counter_rect = counter_surf.get_rect(centerx=self.width // 2, top=progress_y + 20)
         self.screen.blit(counter_surf, counter_rect)
 
-        # Activity feed (using layout constants)
-        self._draw_activity_feed()
+        # Activity panel (bottom-center, when visible)
+        if self.activity_visible:
+            self._draw_activity_panel()
 
-        # Footer with controls
-        footer_text = "N/→=Next | P/←=Prev | F=Quiz | S=Sleep | T=Timer | 1-5=Deck | ESC=Exit"
+        # Footer
+        footer_y = self.height - 25
+        footer_text = "N/→=Next | P/←=Prev | F=Quiz | S=Sleep | T=Timer | 1-5=Subject | ↑/↓=Level | A=Activity | ESC=Exit"
         footer_surf = self.font_small.render(footer_text, True, self.colors['gray'])
-        footer_rect = footer_surf.get_rect(centerx=self.width//2, bottom=self.height - 15)
+        footer_rect = footer_surf.get_rect(centerx=self.width // 2, bottom=footer_y)
         self.screen.blit(footer_surf, footer_rect)
 
-        # Corner markers (use current deck color)
-        self.draw_corner_markers(deck_color)
-
-        # Sleep mode overlay (drawn after everything else)
-        if self.sleep_mode:
-            overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-            # Subtle pulsing alpha between 160-200
-            base_alpha = 180 + int(20 * math.sin(self.sleep_pulse))
-            overlay.fill((0, 0, 0, base_alpha))
-            self.screen.blit(overlay, (0, 0))
-
-            title_surf = self.font_medium.render("SLEEP MODE", True, self.colors["green"])
-            title_rect = title_surf.get_rect(center=(self.width//2, self.height//2 - 40))
-            self.screen.blit(title_surf, title_rect)
-
-            msg = "Screen dimmed · Rest your eyes · Press S to resume"
-            msg_surf = self.font_small.render(msg, True, self.colors["gray"])
-            msg_rect = msg_surf.get_rect(center=(self.width//2, self.height//2 + 10))
-            self.screen.blit(msg_surf, msg_rect)
+        # Corner markers
+        self.draw_corner_markers(theme_color)
 
         # Apply fade effect
         if self.fade_alpha < 255:
@@ -453,34 +546,39 @@ class EducationDemo(MotiBeamScene):
             fade_surface.fill(self.colors['black'])
             self.screen.blit(fade_surface, (0, 0))
 
-    def _draw_activity_feed(self):
-        """Draw mini activity feed in bottom-right corner (using layout constants)"""
-        feed_x = self.activity_x
-        feed_y = self.height - 200
-        feed_width = self.activity_width
+    def _draw_activity_panel(self):
+        """Draw activity panel at bottom-center"""
+        panel_width = 600
+        panel_height = 110
+        panel_x = (self.width - panel_width) // 2
+        panel_y = self.height - 90
+
+        # Background
+        panel_rect = pygame.Rect(panel_x, panel_y, panel_width, panel_height)
+        pygame.draw.rect(self.screen, (15, 15, 15), panel_rect, border_radius=10)
+        pygame.draw.rect(self.screen, self.colors['cyan'], panel_rect, 2, border_radius=10)
 
         # Header
-        header_surf = self.font_small.render("ACTIVITY", True, self.colors['cyan'])
-        self.screen.blit(header_surf, (feed_x, feed_y))
+        header_surf = self.font_small.render("RECENT ACTIVITY", True, self.colors['cyan'])
+        header_rect = header_surf.get_rect(centerx=self.width // 2, top=panel_y + 8)
+        self.screen.blit(header_surf, header_rect)
 
         # Activity lines
-        line_y = feed_y + 40
-        line_height = 35
-
-        for i, activity in enumerate(self.activity_log[:3]):  # Max 3 lines for cleaner look
+        line_y = panel_y + 35
+        for i, activity in enumerate(self.activity_log[:3]):
             # Fade older activities
-            age_factor = 1.0 - (i * 0.2)
+            age_factor = 1.0 - (i * 0.25)
             text_color = tuple(int(c * age_factor) for c in self.colors['white'])
 
             # Truncate if too long
-            max_chars = int(feed_width / 8)  # Approximate characters based on width
-            if len(activity) > max_chars:
-                activity = activity[:max_chars - 3] + "..."
+            if len(activity) > 65:
+                activity = activity[:62] + "..."
 
             activity_surf = self.font_small.render(activity, True, text_color)
-            self.screen.blit(activity_surf, (feed_x, line_y))
+            activity_rect = activity_surf.get_rect(centerx=self.width // 2, top=line_y)
+            self.screen.blit(activity_surf, activity_rect)
 
-            line_y += line_height
+            line_y += 22
 
     def run(self, duration=1500):
         """Custom run loop with proper event and dt handling"""
@@ -490,7 +588,7 @@ class EducationDemo(MotiBeamScene):
         while self.running:
             # Calculate delta time
             current_time = pygame.time.get_ticks()
-            dt = (current_time - last_time) / 1000.0  # Convert to seconds
+            dt = (current_time - last_time) / 1000.0
             last_time = current_time
 
             # Auto-exit after duration (if specified)
@@ -501,28 +599,28 @@ class EducationDemo(MotiBeamScene):
                     self._log("Auto session end")
                     self.running = False
 
-            # Handle events with individual event passing
+            # Handle events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
                 else:
                     self.handle_events(event)
 
-            # Update with delta time
+            # Update
             self.update(dt)
 
             # Draw
             self.draw()
 
-            # Flip display and tick clock
+            # Flip and tick
             pygame.display.flip()
-            self.clock.tick(60)  # 60 FPS for smooth animations
+            self.clock.tick(60)
 
-        # Only quit pygame if standalone
+        # Cleanup
         if self.standalone:
             pygame.quit()
         print("Scene complete.")
 
 if __name__ == "__main__":
     demo = EducationDemo(standalone=True)
-    demo.run(duration=1500)  # 25 minutes when standalone
+    demo.run(duration=1500)
