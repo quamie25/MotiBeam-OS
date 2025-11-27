@@ -51,6 +51,12 @@ class EducationDemo(MotiBeamScene):
         self.quiz_mode = False
         self.definition_visible = True
 
+        # Card transition animation
+        self.card_slide_offset = 0.0  # Horizontal offset for slide animation
+        self.card_slide_direction = 0  # 1 = from right, -1 = from left, 0 = no animation
+        self.card_slide_duration = 0.25  # 0.25 seconds
+        self.card_slide_timer = 0.0
+
         # Animation state
         self.fade_alpha = 0  # For fade-in effect (0 to 255)
         self.fade_in_complete = False
@@ -84,6 +90,12 @@ class EducationDemo(MotiBeamScene):
         }
         return colors.get(self.current_deck_name, self.colors['cyan'])
 
+    def _start_card_transition(self, direction):
+        """Start a card slide transition animation"""
+        self.card_slide_direction = direction  # 1 = from right, -1 = from left
+        self.card_slide_timer = 0.0
+        self.card_slide_offset = direction * 300  # Start 300px off-screen
+
     def handle_events(self, event):
         """Handle individual pygame event"""
         if event.type == pygame.KEYDOWN:
@@ -109,17 +121,19 @@ class EducationDemo(MotiBeamScene):
                 self.current_card_index = 0
                 self._log(f"Switched to {self.current_deck_name} deck")
 
-            # Card navigation
+            # Card navigation with slide animation
             elif event.key == pygame.K_n or event.key == pygame.K_RIGHT:
                 deck = self.decks[self.current_deck_name]
                 self.current_card_index = (self.current_card_index + 1) % len(deck)
                 card = self._get_current_card()
                 self._log(f"Card {self.current_card_index + 1}/{len(deck)} - {card['term']}")
+                self._start_card_transition(1)  # Slide from right
             elif event.key == pygame.K_p or event.key == pygame.K_LEFT:
                 deck = self.decks[self.current_deck_name]
                 self.current_card_index = (self.current_card_index - 1) % len(deck)
                 card = self._get_current_card()
                 self._log(f"Card {self.current_card_index + 1}/{len(deck)} - {card['term']}")
+                self._start_card_transition(-1)  # Slide from left
 
             # Quiz mode toggle
             elif event.key == pygame.K_f or event.key == pygame.K_SPACE:
@@ -161,6 +175,20 @@ class EducationDemo(MotiBeamScene):
             if self.fade_alpha <= 0:
                 self.running = False
 
+        # Update card slide animation
+        if self.card_slide_direction != 0:
+            self.card_slide_timer += dt
+            # Ease-out animation
+            progress = min(1.0, self.card_slide_timer / self.card_slide_duration)
+            # Smooth easing function
+            eased_progress = 1.0 - (1.0 - progress) ** 3
+            self.card_slide_offset = self.card_slide_direction * 300 * (1.0 - eased_progress)
+
+            # End animation when complete
+            if progress >= 1.0:
+                self.card_slide_offset = 0.0
+                self.card_slide_direction = 0
+
         # Update timer
         if self.timer_running and not self.timer_complete:
             self.timer_seconds -= dt
@@ -170,11 +198,27 @@ class EducationDemo(MotiBeamScene):
                 self.timer_running = False
                 self._log("Session completed - take a break!")
 
-        # Quiz mode: fade in definition after 1 second
-        if self.quiz_mode and not self.definition_visible:
-            # Simple implementation: show definition after a brief delay
-            # For now, we'll just toggle it immediately when quiz mode is activated
-            pass
+    def _wrap_text(self, text, font, max_width):
+        """Wrap text to fit within max_width, returning list of lines"""
+        words = text.split(' ')
+        lines = []
+        current_line = []
+
+        for word in words:
+            test_line = ' '.join(current_line + [word])
+            test_surf = font.render(test_line, True, (255, 255, 255))
+
+            if test_surf.get_width() <= max_width:
+                current_line.append(word)
+            else:
+                if current_line:
+                    lines.append(' '.join(current_line))
+                current_line = [word]
+
+        if current_line:
+            lines.append(' '.join(current_line))
+
+        return lines
 
     def draw(self):
         """Render the scene"""
@@ -228,11 +272,18 @@ class EducationDemo(MotiBeamScene):
         status_rect = status_surf.get_rect(centerx=self.width//2, top=330)
         self.screen.blit(status_surf, status_rect)
 
-        # Flashcard area
+        # Flashcard area with slide animation
         card_y_start = 390
+        card_x_center = self.width // 2 + int(self.card_slide_offset)
+        card_box_width = self.width - 500  # Reduced width to prevent overlap
 
         # Card border (with quiz mode pulse)
-        card_border_rect = pygame.Rect(200, card_y_start - 20, self.width - 400, 220)
+        card_border_rect = pygame.Rect(
+            card_x_center - card_box_width // 2,
+            card_y_start - 20,
+            card_box_width,
+            220
+        )
         border_width = 3
         if self.quiz_mode:
             quiz_pulse = abs(math.sin(self.animation_time * 3))
@@ -245,12 +296,12 @@ class EducationDemo(MotiBeamScene):
 
         # Term label
         term_label = self.font_small.render("TERM:", True, deck_color)
-        term_label_rect = term_label.get_rect(centerx=self.width//2, top=card_y_start)
+        term_label_rect = term_label.get_rect(centerx=card_x_center, top=card_y_start)
         self.screen.blit(term_label, term_label_rect)
 
         # Term text
         term_surf = self.font_large.render(card['term'], True, self.colors['white'])
-        term_rect = term_surf.get_rect(centerx=self.width//2, top=card_y_start + 50)
+        term_rect = term_surf.get_rect(centerx=card_x_center, top=card_y_start + 50)
         self.screen.blit(term_surf, term_rect)
 
         # Definition (shown or hidden based on quiz mode)
@@ -259,31 +310,32 @@ class EducationDemo(MotiBeamScene):
             def_text = "Press F or SPACE to reveal"
             def_color = self.colors['gray']
             def_font = self.font_small
+            def_surf = def_font.render(def_text, True, def_color)
+            def_rect = def_surf.get_rect(centerx=card_x_center, top=card_y_start + 180)
+            self.screen.blit(def_surf, def_rect)
         else:
             # Definition label
             def_label = self.font_small.render("DEFINITION:", True, deck_color)
-            def_label_rect = def_label.get_rect(centerx=self.width//2, top=card_y_start + 140)
+            def_label_rect = def_label.get_rect(centerx=card_x_center, top=card_y_start + 140)
             self.screen.blit(def_label, def_label_rect)
 
-            # Definition text (word-wrapped if needed)
-            def_text = card['definition']
-            def_color = self.colors['white']
-            def_font = self.font_small
+            # Definition text with word wrapping (70% of card box width)
+            max_def_width = int(card_box_width * 0.7)
+            def_font = pygame.font.Font(None, 36)  # Slightly smaller font for definitions
+            wrapped_lines = self._wrap_text(card['definition'], def_font, max_def_width)
 
-        # Render definition/hint
-        def_surf = def_font.render(def_text, True, def_color)
-        if def_surf.get_width() > self.width - 450:
-            # Simple truncation for very long definitions
-            def_text = def_text[:60] + "..."
-            def_surf = def_font.render(def_text, True, def_color)
-
-        def_rect = def_surf.get_rect(centerx=self.width//2, top=card_y_start + 180)
-        self.screen.blit(def_surf, def_rect)
+            # Draw wrapped lines
+            line_y = card_y_start + 175
+            for line in wrapped_lines[:2]:  # Max 2 lines to fit in card
+                line_surf = def_font.render(line, True, self.colors['white'])
+                line_rect = line_surf.get_rect(centerx=card_x_center, top=line_y)
+                self.screen.blit(line_surf, line_rect)
+                line_y += 30
 
         # Progress bar
         progress_y = card_y_start + 240
         progress_width = 600
-        progress_x = (self.width - progress_width) // 2
+        progress_x = card_x_center - progress_width // 2
 
         # Background bar
         progress_bg = pygame.Rect(progress_x, progress_y, progress_width, 12)
@@ -302,10 +354,10 @@ class EducationDemo(MotiBeamScene):
         # Card counter
         counter_text = f"Card {self.current_card_index + 1} of {len(deck)}"
         counter_surf = self.font_small.render(counter_text, True, self.colors['gray'])
-        counter_rect = counter_surf.get_rect(centerx=self.width//2, top=progress_y + 25)
+        counter_rect = counter_surf.get_rect(centerx=card_x_center, top=progress_y + 25)
         self.screen.blit(counter_surf, counter_rect)
 
-        # Activity feed (bottom-right)
+        # Activity feed (bottom-right, moved further right by +120px)
         self._draw_activity_feed()
 
         # Footer with controls
@@ -325,10 +377,10 @@ class EducationDemo(MotiBeamScene):
             self.screen.blit(fade_surface, (0, 0))
 
     def _draw_activity_feed(self):
-        """Draw mini activity feed in bottom-right corner"""
-        feed_x = self.width - 420
+        """Draw mini activity feed in bottom-right corner (moved +120px right)"""
+        feed_x = self.width - 300  # Moved from -420 to -300 (+120px)
         feed_y = self.height - 200
-        feed_width = 400
+        feed_width = 280  # Reduced from 400 to 280 to fit
 
         # Header
         header_surf = self.font_small.render("ACTIVITY", True, self.colors['cyan'])
@@ -343,9 +395,9 @@ class EducationDemo(MotiBeamScene):
             age_factor = 1.0 - (i * 0.15)
             text_color = tuple(int(c * age_factor) for c in self.colors['white'])
 
-            # Truncate if too long
-            if len(activity) > 45:
-                activity = activity[:42] + "..."
+            # Truncate if too long (shorter limit for narrower panel)
+            if len(activity) > 35:
+                activity = activity[:32] + "..."
 
             activity_surf = self.font_small.render(activity, True, text_color)
             self.screen.blit(activity_surf, (feed_x, line_y))
