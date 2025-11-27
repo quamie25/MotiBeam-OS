@@ -129,9 +129,12 @@ class EducationDemo(MotiBeamScene):
         # Quiz mode
         self.quiz_mode = False
 
-        # Sleep mode
-        self.sleep_mode = False
+        # Sleep mode (soft/deep states)
+        self.sleep_state = "none"  # "none", "soft", "deep"
         self.sleep_pulse = 0.0
+        self.breath_time = 0.0
+        self.last_sleep_toggle_time = 0.0
+        self.last_key_time = pygame.time.get_ticks() / 1000.0
 
         # Activity panel
         self.activity_visible = False
@@ -190,9 +193,36 @@ class EducationDemo(MotiBeamScene):
     def handle_events(self, event):
         """Handle individual pygame event"""
         if event.type == pygame.KEYDOWN:
+            # Update last key time for all keys
+            current_time = pygame.time.get_ticks() / 1000.0
+
             if event.key == pygame.K_ESCAPE:
                 self.fade_out = True
                 self._log("Exiting...")
+                self.last_key_time = current_time
+
+            # Sleep mode toggle (S key with double-tap detection)
+            elif event.key == pygame.K_s:
+                time_since_last_sleep_toggle = current_time - self.last_sleep_toggle_time
+
+                if self.sleep_state == "none":
+                    self.sleep_state = "soft"
+                    self._log("Sleep mode (soft) enabled")
+                elif self.sleep_state == "soft":
+                    if time_since_last_sleep_toggle < 0.5:
+                        # Double-tap detected - enter deep sleep
+                        self.sleep_state = "deep"
+                        self._log("Sleep mode (deep) enabled")
+                    else:
+                        # Single tap after delay - exit sleep
+                        self.sleep_state = "none"
+                        self._log("Sleep mode disabled")
+                elif self.sleep_state == "deep":
+                    self.sleep_state = "none"
+                    self._log("Sleep mode disabled")
+
+                self.last_sleep_toggle_time = current_time
+                self.last_key_time = current_time
 
             # Subject selection (1-5)
             elif event.key == pygame.K_1:
@@ -202,6 +232,7 @@ class EducationDemo(MotiBeamScene):
                 subject = self._get_current_subject()
                 level = self._get_current_level()
                 self._log(f"{subject['name']} - {level['name']}")
+                self.last_key_time = current_time
             elif event.key == pygame.K_2:
                 self.current_subject_index = 1
                 self.current_level_index = 0
@@ -209,6 +240,7 @@ class EducationDemo(MotiBeamScene):
                 subject = self._get_current_subject()
                 level = self._get_current_level()
                 self._log(f"{subject['name']} - {level['name']}")
+                self.last_key_time = current_time
             elif event.key == pygame.K_3:
                 self.current_subject_index = 2
                 self.current_level_index = 0
@@ -216,6 +248,7 @@ class EducationDemo(MotiBeamScene):
                 subject = self._get_current_subject()
                 level = self._get_current_level()
                 self._log(f"{subject['name']} - {level['name']}")
+                self.last_key_time = current_time
             elif event.key == pygame.K_4:
                 self.current_subject_index = 3
                 self.current_level_index = 0
@@ -223,6 +256,7 @@ class EducationDemo(MotiBeamScene):
                 subject = self._get_current_subject()
                 level = self._get_current_level()
                 self._log(f"{subject['name']} - {level['name']}")
+                self.last_key_time = current_time
             elif event.key == pygame.K_5:
                 self.current_subject_index = 4
                 self.current_level_index = 0
@@ -230,6 +264,7 @@ class EducationDemo(MotiBeamScene):
                 subject = self._get_current_subject()
                 level = self._get_current_level()
                 self._log(f"{subject['name']} - {level['name']}")
+                self.last_key_time = current_time
 
             # Level selection (UP/DOWN)
             elif event.key == pygame.K_UP:
@@ -239,6 +274,7 @@ class EducationDemo(MotiBeamScene):
                 self.current_card_index = 0
                 level = self._get_current_level()
                 self._log(f"Level: {level['name']}")
+                self.last_key_time = current_time
             elif event.key == pygame.K_DOWN:
                 subject = self._get_current_subject()
                 num_levels = len(subject["levels"])
@@ -246,6 +282,7 @@ class EducationDemo(MotiBeamScene):
                 self.current_card_index = 0
                 level = self._get_current_level()
                 self._log(f"Level: {level['name']}")
+                self.last_key_time = current_time
 
             # Card navigation
             elif event.key == pygame.K_n or event.key == pygame.K_RIGHT:
@@ -254,32 +291,28 @@ class EducationDemo(MotiBeamScene):
                 card = self._get_current_card()
                 self._log(f"Card: {card['term']}")
                 self._start_card_transition(1)
+                self.last_key_time = current_time
             elif event.key == pygame.K_p or event.key == pygame.K_LEFT:
                 level = self._get_current_level()
                 self.current_card_index = (self.current_card_index - 1) % len(level["cards"])
                 card = self._get_current_card()
                 self._log(f"Card: {card['term']}")
                 self._start_card_transition(-1)
+                self.last_key_time = current_time
 
             # Quiz mode toggle
             elif event.key == pygame.K_f or event.key == pygame.K_SPACE:
                 self.quiz_mode = not self.quiz_mode
                 mode_text = "ON" if self.quiz_mode else "OFF"
                 self._log(f"Quiz mode {mode_text}")
+                self.last_key_time = current_time
 
             # Activity panel toggle
             elif event.key == pygame.K_a:
                 self.activity_visible = not self.activity_visible
                 status = "shown" if self.activity_visible else "hidden"
                 self._log(f"Activity {status}")
-
-            # Sleep mode toggle
-            elif event.key == pygame.K_s:
-                self.sleep_mode = not self.sleep_mode
-                if self.sleep_mode:
-                    self._log("Sleep mode enabled")
-                else:
-                    self._log("Sleep mode disabled")
+                self.last_key_time = current_time
 
             # Timer controls
             elif event.key == pygame.K_t:
@@ -288,11 +321,13 @@ class EducationDemo(MotiBeamScene):
                     self._log("Timer started")
                 else:
                     self._log("Timer paused")
+                self.last_key_time = current_time
             elif event.key == pygame.K_r:
                 self.timer_seconds = 25 * 60
                 self.timer_complete = False
                 self.timer_running = False
                 self._log("Timer reset")
+                self.last_key_time = current_time
 
     def update(self, dt):
         """Update scene state with delta time"""
@@ -322,13 +357,29 @@ class EducationDemo(MotiBeamScene):
                 self.card_slide_offset = 0.0
                 self.card_slide_direction = 0
 
-        # Sleep mode pulse
-        if self.sleep_mode:
+        # Sleep mode animations
+        if self.sleep_state == "soft":
+            # Breathing circle animation
+            self.breath_time += dt * 0.5  # Slow breathing cycle
+            if self.breath_time > math.tau:
+                self.breath_time -= math.tau
+        elif self.sleep_state == "deep":
+            # Deep sleep pulse for dot
             self.sleep_pulse += dt * 1.5
             if self.sleep_pulse > math.tau:
                 self.sleep_pulse -= math.tau
         else:
+            self.breath_time = 0.0
             self.sleep_pulse = 0.0
+
+        # Auto-sleep after 180 seconds of inactivity
+        if self.sleep_state == "none" and self.timer_running:
+            current_time = pygame.time.get_ticks() / 1000.0
+            time_since_last_key = current_time - self.last_key_time
+            if time_since_last_key >= 180.0:
+                self.sleep_state = "soft"
+                self._log("Auto sleep enabled after 3 minutes of inactivity")
+                self.last_key_time = current_time  # Reset to avoid repeated triggers
 
         # Update timer (continues even in sleep mode)
         if self.timer_running and not self.timer_complete:
@@ -371,31 +422,39 @@ class EducationDemo(MotiBeamScene):
         card = self._get_current_card()
         theme_color = self._get_theme_color()
 
-        # Sleep mode overlay - draw and return early
-        if self.sleep_mode:
-            # Semi-transparent overlay
+        # Soft sleep mode overlay
+        if self.sleep_state == "soft":
+            # Dark overlay
             overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-            base_alpha = 200
-            overlay.fill((0, 0, 0, base_alpha))
+            overlay.fill((0, 0, 0, 180))
             self.screen.blit(overlay, (0, 0))
 
-            # Sleep mode title
-            title_surf = self.font_large.render("SLEEP MODE", True, theme_color)
-            title_rect = title_surf.get_rect(center=(self.width // 2, self.height // 2 - 50))
+            # Title
+            title_surf = self.font_medium.render("SLEEP MODE", True, theme_color)
+            title_rect = title_surf.get_rect(center=(self.width // 2, self.height // 2 - 80))
             self.screen.blit(title_surf, title_rect)
 
             # Message
             msg = "Screen dimmed · Rest your eyes · Press S to resume"
             msg_surf = self.font_small.render(msg, True, self.colors["gray"])
-            msg_rect = msg_surf.get_rect(center=(self.width // 2, self.height // 2 + 10))
+            msg_rect = msg_surf.get_rect(center=(self.width // 2, self.height // 2 - 30))
             self.screen.blit(msg_surf, msg_rect)
 
-            # Subtle pulsing dot
-            pulse_alpha = int(100 + 100 * abs(math.sin(self.sleep_pulse)))
-            pulse_surf = pygame.Surface((12, 12), pygame.SRCALPHA)
-            pygame.draw.circle(pulse_surf, (*theme_color, pulse_alpha), (6, 6), 6)
-            pulse_rect = pulse_surf.get_rect(center=(self.width // 2, self.height // 2 + 60))
-            self.screen.blit(pulse_surf, pulse_rect)
+            # Breathing circle
+            radius = int(40 + 6 * math.sin(self.breath_time))
+            breath_surf = pygame.Surface((radius * 2 + 10, radius * 2 + 10), pygame.SRCALPHA)
+            breath_color = (*theme_color, 60)  # Low opacity
+            pygame.draw.circle(breath_surf, breath_color, (radius + 5, radius + 5), radius, 2)
+            breath_rect = breath_surf.get_rect(center=(self.width // 2, self.height // 2 + 40))
+            self.screen.blit(breath_surf, breath_rect)
+
+            # Inhale/Exhale text (alternates every ~pi seconds)
+            breath_phase = int(self.breath_time / math.pi) % 2
+            breath_text = "Inhale" if breath_phase == 0 else "Exhale"
+            breath_text_surf = self.font_small.render(breath_text, True, theme_color)
+            breath_text_surf.set_alpha(120)
+            breath_text_rect = breath_text_surf.get_rect(center=(self.width // 2, self.height // 2 + 40))
+            self.screen.blit(breath_text_surf, breath_text_rect)
 
             # Apply fade effect
             if self.fade_alpha < 255:
@@ -405,6 +464,39 @@ class EducationDemo(MotiBeamScene):
                 self.screen.blit(fade_surface, (0, 0))
 
             return  # Skip rendering everything else
+
+        # Deep sleep mode overlay
+        if self.sleep_state == "deep":
+            # Very dark overlay
+            overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 235))
+            self.screen.blit(overlay, (0, 0))
+
+            # Tiny dot in bottom-right
+            dot_x = self.width - 30
+            dot_y = self.height - 30
+            pulse_alpha = int(150 + 60 * abs(math.sin(self.sleep_pulse)))
+            dot_surf = pygame.Surface((12, 12), pygame.SRCALPHA)
+            pygame.draw.circle(dot_surf, (*theme_color, pulse_alpha), (6, 6), 5)
+            self.screen.blit(dot_surf, (dot_x - 6, dot_y - 6))
+
+            # Tiny "S to wake" text
+            wake_text = "S to wake"
+            wake_surf = self.font_small.render(wake_text, True, self.colors["gray"])
+            wake_surf.set_alpha(100)
+            wake_rect = wake_surf.get_rect(center=(dot_x, dot_y - 20))
+            self.screen.blit(wake_surf, wake_rect)
+
+            # Apply fade effect
+            if self.fade_alpha < 255:
+                fade_surface = pygame.Surface((self.width, self.height))
+                fade_surface.set_alpha(255 - int(self.fade_alpha))
+                fade_surface.fill(self.colors['black'])
+                self.screen.blit(fade_surface, (0, 0))
+
+            return  # Skip rendering everything else
+
+        # Normal rendering (sleep_state == "none")
 
         # Main header - Level name (large)
         header_text = level["name"].upper()
