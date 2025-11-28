@@ -24,10 +24,20 @@ class MotiBeamApp:
     
     def __init__(self):
         pygame.init()
-        self.width = 1280
-        self.height = 720
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+
+        # Create a fullscreen window that uses the current desktop resolution
         pygame.display.set_caption("MotiBeam OS")
+
+        # First create fullscreen with (0, 0) so SDL uses the desktop size
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+
+        # Read back the actual size from pygame
+        info = pygame.display.Info()
+        self.width = info.current_w
+        self.height = info.current_h
+
+        print(f"[MotiBeam] Using resolution {self.width}x{self.height}")
+
         pygame.mouse.set_visible(False)
         
         self.running = True
