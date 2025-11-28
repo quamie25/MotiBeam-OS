@@ -1,0 +1,28 @@
+{
+  "Display": {
+    "brightness": 75,
+    "screen_ratio": "Auto"
+  },
+  "Visuals": {
+    "theme": "Dark",
+    "animation_speed": 50
+  },
+  "Scenes": {
+    "active_scene": "Fireplace",
+    "category_filter": "All"
+  },
+  "Sensors": {
+    "presence_detection": false,
+    "mic_sensitivity": 60
+  },
+  "Profiles": {
+    "active_profile": "Smart Home"
+  },
+  "System": {
+    "version": "MotiBeamOS v3.0"
+  },
+  "Demo": {
+    "enabled": false,
+    "demo_profile": "Smart Home"
+  }
+}
