@@ -219,27 +219,44 @@ class MotiBeamV3:
 
     def show_main_menu(self):
         """Display main menu and return selection"""
+        print("[DEBUG] Entering show_main_menu()")
+        print(f"[DEBUG] self.running = {self.running}")
+
         selected = None
         menu_running = True
         hover_index = 0
 
+        print("[DEBUG] Starting main menu loop...")
+
+        frame_count = 0
         while menu_running and self.running:
+            frame_count += 1
+            if frame_count % 30 == 1:  # Log every 30 frames (once per second at 30fps)
+                print(f"[DEBUG] Menu loop frame {frame_count}")
+
             # Handle events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    print("[DEBUG] QUIT event received")
                     self.running = False
                     menu_running = False
                 elif event.type == pygame.KEYDOWN:
+                    print(f"[DEBUG] Key pressed: {event.key} (unicode: '{event.unicode}')")
+
                     if event.key == pygame.K_ESCAPE:
+                        print("[DEBUG] ESC pressed -> Exit application")
                         self.running = False
                         menu_running = False
                     elif event.key == pygame.K_s:
+                        print("[DEBUG] S pressed -> Open Settings Panel")
                         selected = "settings"
                         menu_running = False
                     elif event.key == pygame.K_b:
+                        print("[DEBUG] B pressed -> Enter Ambient Scenes")
                         selected = "ambient"
                         menu_running = False
                     elif event.key == pygame.K_h:
+                        print("[DEBUG] H pressed -> Enter Auto HUD Demo")
                         selected = "auto_hud"
                         menu_running = False
                     elif event.key == pygame.K_UP:
@@ -354,6 +371,7 @@ class MotiBeamV3:
             pygame.display.flip()
             self.clock.tick(30)
 
+        print(f"[DEBUG] Exiting main menu, selected = {selected}")
         return selected
 
     def run_demo(self, demo_name):
@@ -517,15 +535,24 @@ class MotiBeamV3:
 
     def run(self):
         """Main application loop"""
+        print("[DEBUG] Entering main run() loop")
+
         # Show boot screen
         self.show_boot_screen()
 
+        print("[DEBUG] Boot screen complete, entering main loop")
+
         # Main loop
         while self.running:
+            print(f"[DEBUG] Main loop iteration, self.running = {self.running}")
+
             # Show menu and get selection
             selection = self.show_main_menu()
 
+            print(f"[DEBUG] Menu returned selection: {selection}, self.running = {self.running}")
+
             if not self.running:
+                print("[DEBUG] self.running is False, breaking main loop")
                 break
 
             # Handle selection
