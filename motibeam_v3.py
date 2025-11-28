@@ -193,6 +193,8 @@ class MotiBeamV3:
                 boot = BootScreen(standalone=False)
                 boot.screen = self.screen
                 boot.run(duration=5)
+                # Clear event queue after boot screen to prevent interference
+                pygame.event.clear()
             except Exception as e:
                 print(f"Boot screen error (continuing anyway): {e}")
         else:
@@ -208,6 +210,12 @@ class MotiBeamV3:
 
             pygame.display.flip()
             pygame.time.wait(2000)
+            # Clear event queue after splash
+            pygame.event.clear()
+
+        # Ensure main app is still running
+        self.running = True
+        print("Boot sequence complete, entering main menu...")
 
     def show_main_menu(self):
         """Display main menu and return selection"""

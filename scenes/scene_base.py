@@ -63,11 +63,14 @@ class MotiBeamScene:
     def handle_events(self):
         """Handle pygame events"""
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            # Only handle QUIT/ESC if we're standalone
+            # In non-standalone mode, just consume events to prevent queue buildup
+            if self.standalone:
+                if event.type == pygame.QUIT:
                     self.running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
                     
     def draw_header(self, title, subtitle=""):
         """Draw scene header"""
