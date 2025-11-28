@@ -1,11 +1,54 @@
 # MotiBeamOS v3.0 Upgrade Documentation
 
+## Quick Start - Raspberry Pi Instructions
+
+### Running on Your Pi
+
+```bash
+# Navigate to your MotiBeam-OS directory
+cd ~/MotiBeam-OS
+
+# Fetch latest changes
+git fetch origin
+
+# Checkout the v3 branch
+git checkout claude/motibeamos-v3-upgrade-01RZdhsAnZcKJT5itvLLR7xM
+
+# Run MotiBeamOS v3.0
+python3 motibeam_v3.py
+```
+
+### What You'll Get
+
+**Core v3.0 Features (Always Available):**
+- ✅ Settings Panel (press `S`)
+- ✅ Ambient & Holiday Scenes (press `B`)
+- ✅ Auto HUD Demo (press `H`)
+
+**Optional Vertical Demos:**
+- The menu will automatically show only available demos
+- If demo files are missing, v3 will still run perfectly
+- Optional demos: Clinical, Education, Automotive, Emergency, Industrial, Security
+
+### Keyboard Shortcuts
+
+**Main Menu:**
+- `S` → Settings Panel
+- `B` → Ambient Scenes
+- `H` → Auto HUD Demo
+- `1-6` → Vertical demos (if available)
+- `ESC` → Exit
+
+---
+
 ## Overview
 
 MotiBeamOS v3.0 is a major upgrade introducing three core features:
 1. **Settings Panel** - Comprehensive configuration UI
 2. **Ambient Background Scenes** - 10 beautiful ambient/holiday scenes
 3. **Auto Vertical HUD** - In-car heads-up display demo
+
+**Note:** The application is now self-contained and tolerant of missing optional modules. It will run successfully with just the core v3 features, even if no vertical demos are present.
 
 ---
 
@@ -547,26 +590,67 @@ Potential additions for v3.1+:
 
 ---
 
+## Optional Modules
+
+MotiBeamOS v3.0 is designed to be resilient and will run successfully even if optional modules are missing.
+
+### Required Modules (Core v3)
+
+These **must** be present for v3 to run:
+- `settings_panel.py`
+- `core/scene_manager.py`
+- `vertical_auto.py`
+- Scene files: `scenes/scene_*.py` (10 ambient/holiday scenes)
+
+### Optional Modules (Vertical Demos)
+
+These are **optional** and can be added later:
+- `scenes/boot_screen.py` - Boot sequence (fallback: simple splash)
+- `scenes/clinical_demo.py` or `scenes/clinical_demo_enhanced.py`
+- `scenes/education_demo.py`
+- `scenes/automotive_demo.py`
+- `scenes/emergency_demo.py`
+- `scenes/industrial_demo.py`
+- `scenes/security_demo.py`
+
+**Behavior:**
+- If optional modules are missing, v3 will print a note and continue
+- Menu will only show available demos
+- Core v3 features (Settings, Scenes, Auto HUD) always work
+
+---
+
 ## Troubleshooting
 
+**Issue:** ModuleNotFoundError for core modules
+- Ensure you're on the correct branch: `claude/motibeamos-v3-upgrade-01RZdhsAnZcKJT5itvLLR7xM`
+- Run `git pull origin` to get latest changes
+- Verify these files exist: `settings_panel.py`, `core/scene_manager.py`, `vertical_auto.py`
+
 **Issue:** Scenes not loading
-- Check that `scenes/scene_*.py` files exist
+- Check that `scenes/scene_*.py` files exist (fireplace, aurora, rain, etc.)
 - Look for error messages in console
-- Verify scene modules have required interface
+- Verify scene modules have required interface (SCENE_NAME, SCENE_CATEGORY, init/update/render)
 
 **Issue:** Settings not saving
 - Check `config/` directory exists and is writable
 - Verify `settings.json` is valid JSON
+- File will be auto-created with defaults if missing
 
 **Issue:** Performance issues
 - Reduce number of particles in scenes (edit scene files)
-- Lower animation speed in settings
+- Lower animation speed in Settings Panel
 - Check system resources (Raspberry Pi may need optimization)
 
-**Issue:** HUD not activating
-- Verify Demo Mode is enabled in Settings
+**Issue:** Auto HUD not activating
+- Verify Demo Mode is enabled in Settings Panel
 - Check Demo Profile is set to "Auto"
-- Try exiting and re-entering Ambient mode
+- Or press `H` from main menu for direct access
+
+**Issue:** Optional demos not showing
+- This is normal if those files don't exist in your branch
+- Check console output for "Note: [demo] not found" messages
+- Core v3 features will still work perfectly
 
 ---
 

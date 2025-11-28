@@ -1,32 +1,90 @@
 #!/usr/bin/env python3
 """
 MotiBeam OS v3.0 - Complete Application
-Integrates: Boot Screen, Menu, Demos, Settings Panel, Ambient Scenes, Auto HUD
+Self-contained version with optional vertical demos
+Core features: Settings Panel, Ambient Scenes, Auto HUD
 """
 
 import sys
 import os
 
-# Add paths for imports
-sys.path.insert(0, '/home/user/MotiBeam-OS')
-sys.path.insert(0, '/home/user/MotiBeam-OS/scenes')
-sys.path.insert(0, '/home/user/MotiBeam-OS/core')
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Add paths for imports (relative to script location)
+sys.path.insert(0, SCRIPT_DIR)
+sys.path.insert(0, os.path.join(SCRIPT_DIR, 'scenes'))
+sys.path.insert(0, os.path.join(SCRIPT_DIR, 'core'))
 
 import pygame
 
-# Import existing demo scenes
-from boot_screen import BootScreen
-from clinical_demo_enhanced import ClinicalWellnessEnhanced
-from automotive_demo import AutomotiveDemo
-from emergency_demo import EmergencyDemo
-from industrial_demo import IndustrialDemo
-from security_demo import SecurityDemo
-from education_demo import EducationDemo
+# Import core v3.0 modules (required)
+try:
+    import settings_panel
+    import scene_manager
+    import vertical_auto
+except ImportError as e:
+    print(f"ERROR: Missing core v3 module: {e}")
+    print("Please ensure settings_panel.py, core/scene_manager.py, and vertical_auto.py exist.")
+    sys.exit(1)
 
-# Import new v3.0 modules
-import settings_panel
-import scene_manager
-import vertical_auto
+# Import optional demo scenes (graceful fallback if missing)
+OPTIONAL_MODULES = {}
+
+# Boot screen (optional)
+try:
+    from boot_screen import BootScreen
+    OPTIONAL_MODULES['boot_screen'] = BootScreen
+except ImportError:
+    print("Note: boot_screen.py not found - skipping boot sequence")
+    OPTIONAL_MODULES['boot_screen'] = None
+
+# Vertical demos (all optional)
+try:
+    from clinical_demo_enhanced import ClinicalWellnessEnhanced
+    OPTIONAL_MODULES['clinical'] = ClinicalWellnessEnhanced
+except ImportError:
+    try:
+        from clinical_demo import ClinicalDemo
+        OPTIONAL_MODULES['clinical'] = ClinicalDemo
+    except ImportError:
+        print("Note: Clinical demo not found - will not appear in menu")
+        OPTIONAL_MODULES['clinical'] = None
+
+try:
+    from education_demo import EducationDemo
+    OPTIONAL_MODULES['education'] = EducationDemo
+except ImportError:
+    print("Note: education_demo.py not found - will not appear in menu")
+    OPTIONAL_MODULES['education'] = None
+
+try:
+    from automotive_demo import AutomotiveDemo
+    OPTIONAL_MODULES['automotive'] = AutomotiveDemo
+except ImportError:
+    print("Note: automotive_demo.py not found - will not appear in menu")
+    OPTIONAL_MODULES['automotive'] = None
+
+try:
+    from emergency_demo import EmergencyDemo
+    OPTIONAL_MODULES['emergency'] = EmergencyDemo
+except ImportError:
+    print("Note: emergency_demo.py not found - will not appear in menu")
+    OPTIONAL_MODULES['emergency'] = None
+
+try:
+    from industrial_demo import IndustrialDemo
+    OPTIONAL_MODULES['industrial'] = IndustrialDemo
+except ImportError:
+    print("Note: industrial_demo.py not found - will not appear in menu")
+    OPTIONAL_MODULES['industrial'] = None
+
+try:
+    from security_demo import SecurityDemo
+    OPTIONAL_MODULES['security'] = SecurityDemo
+except ImportError:
+    print("Note: security_demo.py not found - will not appear in menu")
+    OPTIONAL_MODULES['security'] = None
 
 
 class MotiBeamV3:
@@ -44,7 +102,7 @@ class MotiBeamV3:
         self.clock = pygame.time.Clock()
 
         # UI State
-        self.current_mode = "boot"  # boot, menu, demo, settings, ambient, auto_hud
+        self.current_mode = "menu"
         self.settings_open = False
         self.ambient_mode = False
         self.auto_hud_mode = False
@@ -72,35 +130,40 @@ class MotiBeamV3:
         # Initialize v3.0 components
         self._init_v3_components()
 
+        # Build available menu items
+        self._build_menu_items()
+
     def _init_v3_components(self):
         """Initialize settings panel and scene manager"""
-        # Initialize settings panel
-        settings_panel.init_settings_panel(self.screen, self.font_medium, self.font_small)
+        try:
+            # Initialize settings panel
+            settings_panel.init_settings_panel(self.screen, self.font_medium, self.font_small)
 
-        # Initialize scene manager
-        scene_manager.init_scene_manager(self.screen)
+            # Initialize scene manager
+            scene_manager.init_scene_manager(self.screen)
 
-        # Connect settings panel to scene manager
-        settings_panel.set_scene_manager(scene_manager)
+            # Connect settings panel to scene manager
+            settings_panel.set_scene_manager(scene_manager)
 
-        # Load settings and set initial scene
-        settings = settings_panel.get_current_settings()
-        active_scene = settings.get("Scenes", {}).get("active_scene", "Fireplace")
-        scene_manager.set_active_scene(active_scene)
+            # Load settings and set initial scene
+            settings = settings_panel.get_current_settings()
+            active_scene = settings.get("Scenes", {}).get("active_scene", "Fireplace")
+            scene_manager.set_active_scene(active_scene)
 
-        # Initialize auto HUD
-        vertical_auto.init_auto_vertical(self.screen)
+            # Initialize auto HUD
+            vertical_auto.init_auto_vertical(self.screen)
 
-    def show_boot_screen(self):
-        """Display boot sequence"""
-        boot = BootScreen(standalone=False)
-        boot.screen = self.screen
-        boot.run(duration=5)
+            print("✓ Core v3.0 components initialized successfully")
+        except Exception as e:
+            print(f"ERROR initializing v3 components: {e}")
+            raise
 
-    def show_main_menu(self):
-        """Display main menu and return selection"""
-        # Menu items
-        menu_items = [
+    def _build_menu_items(self):
+        """Build menu items based on available modules"""
+        self.menu_items = []
+
+        # Define potential menu items
+        potential_items = [
             {"key": "1", "name": "Clinical & Wellness", "symbol": "[+]", "color": self.colors['green'],
              "demo": "clinical"},
             {"key": "2", "name": "Education/Learning", "symbol": "[#]", "color": self.colors['purple'],
@@ -115,6 +178,39 @@ class MotiBeamV3:
              "demo": "security"},
         ]
 
+        # Only add items for which we have modules
+        for item in potential_items:
+            if OPTIONAL_MODULES.get(item['demo']) is not None:
+                self.menu_items.append(item)
+
+        print(f"✓ Built menu with {len(self.menu_items)} available vertical demos")
+
+    def show_boot_screen(self):
+        """Display boot sequence (if available)"""
+        BootScreen = OPTIONAL_MODULES.get('boot_screen')
+        if BootScreen:
+            try:
+                boot = BootScreen(standalone=False)
+                boot.screen = self.screen
+                boot.run(duration=5)
+            except Exception as e:
+                print(f"Boot screen error (continuing anyway): {e}")
+        else:
+            # Simple boot splash if no boot_screen module
+            self.screen.fill(self.colors['black'])
+            logo = self.font_huge.render("MotiBeam OS", True, self.colors['cyan'])
+            logo_rect = logo.get_rect(center=(self.width // 2, self.height // 2 - 50))
+            self.screen.blit(logo, logo_rect)
+
+            version = self.font_large.render("v3.0", True, self.colors['white'])
+            version_rect = version.get_rect(center=(self.width // 2, self.height // 2 + 50))
+            self.screen.blit(version, version_rect)
+
+            pygame.display.flip()
+            pygame.time.wait(2000)
+
+    def show_main_menu(self):
+        """Display main menu and return selection"""
         selected = None
         menu_running = True
         hover_index = 0
@@ -130,41 +226,35 @@ class MotiBeamV3:
                         self.running = False
                         menu_running = False
                     elif event.key == pygame.K_s:
-                        # Open settings
                         selected = "settings"
                         menu_running = False
                     elif event.key == pygame.K_b:
-                        # Ambient background scenes
                         selected = "ambient"
                         menu_running = False
-                    elif event.key == pygame.K_1:
-                        selected = menu_items[0]["demo"]
-                        menu_running = False
-                    elif event.key == pygame.K_2:
-                        selected = menu_items[1]["demo"]
-                        menu_running = False
-                    elif event.key == pygame.K_3:
-                        selected = menu_items[2]["demo"]
-                        menu_running = False
-                    elif event.key == pygame.K_4:
-                        selected = menu_items[3]["demo"]
-                        menu_running = False
-                    elif event.key == pygame.K_5:
-                        selected = menu_items[4]["demo"]
-                        menu_running = False
-                    elif event.key == pygame.K_6:
-                        selected = menu_items[5]["demo"]
-                        menu_running = False
-                    elif event.key == pygame.K_a:
-                        selected = "all"
+                    elif event.key == pygame.K_h:
+                        selected = "auto_hud"
                         menu_running = False
                     elif event.key == pygame.K_UP:
-                        hover_index = (hover_index - 1) % len(menu_items)
+                        if self.menu_items:
+                            hover_index = (hover_index - 1) % len(self.menu_items)
                     elif event.key == pygame.K_DOWN:
-                        hover_index = (hover_index + 1) % len(menu_items)
+                        if self.menu_items:
+                            hover_index = (hover_index + 1) % len(self.menu_items)
                     elif event.key == pygame.K_RETURN:
-                        selected = menu_items[hover_index]["demo"]
-                        menu_running = False
+                        if self.menu_items and hover_index < len(self.menu_items):
+                            selected = self.menu_items[hover_index]["demo"]
+                            menu_running = False
+                    elif event.key == pygame.K_a:
+                        if self.menu_items:
+                            selected = "all"
+                            menu_running = False
+                    else:
+                        # Handle number keys for direct selection
+                        for item in self.menu_items:
+                            if event.unicode == item['key']:
+                                selected = item['demo']
+                                menu_running = False
+                                break
 
             # Render menu
             self.screen.fill(self.colors['black'])
@@ -196,47 +286,59 @@ class MotiBeamV3:
             tagline_rect = tagline.get_rect(center=(self.width // 2, 160))
             self.screen.blit(tagline, tagline_rect)
 
-            # Menu title
-            menu_title = self.font_medium.render("SELECT VERTICAL:", True, self.colors['cyan'])
-            menu_title_rect = menu_title.get_rect(centerx=self.width // 2, top=210)
-            self.screen.blit(menu_title, menu_title_rect)
+            # Core v3 options (always available)
+            y_pos = 230
+            core_title = self.font_medium.render("CORE FEATURES:", True, self.colors['cyan'])
+            core_title_rect = core_title.get_rect(centerx=self.width // 2, top=y_pos)
+            self.screen.blit(core_title, core_title_rect)
+            y_pos += 70
 
-            # Menu items
-            y_pos = 290
-            y_spacing = 60
-
-            for i, item in enumerate(menu_items):
-                is_hovered = (i == hover_index)
-
-                # Highlight box for hovered item
-                if is_hovered:
-                    highlight_rect = pygame.Rect(150, y_pos - 8, self.width - 300, 55)
-                    pygame.draw.rect(self.screen, item['color'], highlight_rect, 3, border_radius=10)
-
-                # Menu item text with symbol
-                text = f"{item['key']}. {item['symbol']} {item['name']}"
-                color = item['color'] if is_hovered else self.colors['white']
-                text_surf = self.font_medium.render(text, True, color)
-                text_rect = text_surf.get_rect(centerx=self.width // 2, top=y_pos)
-                self.screen.blit(text_surf, text_rect)
-
-                y_pos += y_spacing
-
-            # Additional options
-            all_y = y_pos + 10
-            options_text = [
-                "A. [ALL] Run All Demos",
+            core_options = [
                 "S. [SET] Settings Panel",
-                "B. [BG] Ambient Scenes"
+                "B. [BG] Ambient Scenes",
+                "H. [HUD] Auto HUD Demo"
             ]
 
-            for i, opt in enumerate(options_text):
+            for opt in core_options:
                 opt_surf = self.font_small.render(opt, True, self.colors['white'])
-                opt_rect = opt_surf.get_rect(center=(self.width // 2, all_y + i * 35))
+                opt_rect = opt_surf.get_rect(center=(self.width // 2, y_pos))
                 self.screen.blit(opt_surf, opt_rect)
+                y_pos += 45
+
+            # Optional vertical demos (if available)
+            if self.menu_items:
+                y_pos += 30
+                demo_title = self.font_medium.render("VERTICAL DEMOS:", True, self.colors['cyan'])
+                demo_title_rect = demo_title.get_rect(centerx=self.width // 2, top=y_pos)
+                self.screen.blit(demo_title, demo_title_rect)
+                y_pos += 60
+
+                for i, item in enumerate(self.menu_items):
+                    is_hovered = (i == hover_index)
+
+                    # Highlight box for hovered item
+                    if is_hovered:
+                        highlight_rect = pygame.Rect(350, y_pos - 8, self.width - 700, 45)
+                        pygame.draw.rect(self.screen, item['color'], highlight_rect, 3, border_radius=10)
+
+                    # Menu item text with symbol
+                    text = f"{item['key']}. {item['symbol']} {item['name']}"
+                    color = item['color'] if is_hovered else self.colors['white']
+                    text_surf = self.font_small.render(text, True, color)
+                    text_rect = text_surf.get_rect(centerx=self.width // 2, top=y_pos)
+                    self.screen.blit(text_surf, text_rect)
+
+                    y_pos += 50
+
+                # "Run All" option
+                if len(self.menu_items) > 1:
+                    y_pos += 10
+                    all_surf = self.font_small.render("A. [ALL] Run All Demos", True, self.colors['white'])
+                    all_rect = all_surf.get_rect(center=(self.width // 2, y_pos))
+                    self.screen.blit(all_surf, all_rect)
 
             # Footer
-            footer_text = "Press 1-6, A, S, B | UP/DOWN + ENTER | ESC to exit"
+            footer_text = "UP/DOWN + ENTER | S/B/H for v3 features | ESC to exit"
             footer_surf = self.font_small.render(footer_text, True, self.colors['gray'])
             footer_rect = footer_surf.get_rect(center=(self.width // 2, self.height - 30))
             self.screen.blit(footer_surf, footer_rect)
@@ -247,30 +349,34 @@ class MotiBeamV3:
         return selected
 
     def run_demo(self, demo_name):
-        """Run selected vertical demo"""
-        demo_map = {
-            "clinical": ClinicalWellnessEnhanced,
-            "education": EducationDemo,
-            "automotive": AutomotiveDemo,
-            "emergency": EmergencyDemo,
-            "industrial": IndustrialDemo,
-            "security": SecurityDemo,
-        }
+        """Run selected vertical demo (if available)"""
+        DemoClass = OPTIONAL_MODULES.get(demo_name)
 
-        if demo_name in demo_map:
+        if DemoClass is None:
+            print(f"Demo '{demo_name}' not available")
+            return
+
+        try:
             print(f"Launching {demo_name} demo...")
-            demo = demo_map[demo_name](standalone=False)
+            demo = DemoClass(standalone=False)
             demo.screen = self.screen
             demo.run(duration=300)  # 5 minutes max
             print(f"{demo_name} demo completed.")
+        except Exception as e:
+            print(f"Error running {demo_name} demo: {e}")
 
     def run_all_demos(self):
-        """Run all 6 vertical demos in order"""
-        demos = ["clinical", "education", "automotive", "emergency", "industrial", "security"]
-        for i, demo_name in enumerate(demos):
+        """Run all available vertical demos in order"""
+        available_demos = [item['demo'] for item in self.menu_items]
+
+        if not available_demos:
+            print("No demos available to run")
+            return
+
+        for i, demo_name in enumerate(available_demos):
             if not self.running:
                 break
-            print(f"Running demo {i + 1}/6: {demo_name}")
+            print(f"Running demo {i + 1}/{len(available_demos)}: {demo_name}")
             self.run_demo(demo_name)
 
     def run_settings_mode(self):
@@ -287,11 +393,6 @@ class MotiBeamV3:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_s:
                         settings_running = False
-                    elif event.key == pygame.K_F11:
-                        # Save settings manually
-                        settings = settings_panel.get_current_settings()
-                        settings_panel.save_settings(settings)
-                        print("Settings saved.")
 
                 # Pass event to settings panel
                 settings_panel.handle_settings_events(event)
@@ -390,7 +491,7 @@ class MotiBeamV3:
                     self.running = False
                     auto_running = False
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_ESCAPE or event.key == pygame.K_h:
                         auto_running = False
 
             # Update and render Auto HUD
@@ -398,7 +499,7 @@ class MotiBeamV3:
             vertical_auto.render_auto_vertical(self.screen)
 
             # Help text
-            help_text = self.font_small.render("ESC: Exit Auto HUD Demo", True, (150, 150, 150))
+            help_text = self.font_small.render("ESC or H: Exit Auto HUD Demo", True, (150, 150, 150))
             self.screen.blit(help_text, (20, self.height - 50))
 
             pygame.display.flip()
@@ -421,12 +522,17 @@ class MotiBeamV3:
 
             # Handle selection
             if selection == "all":
-                print("Running all 6 vertical demos...")
-                self.run_all_demos()
+                if self.menu_items:
+                    print(f"Running all {len(self.menu_items)} available vertical demos...")
+                    self.run_all_demos()
+                else:
+                    print("No vertical demos available")
             elif selection == "settings":
                 self.run_settings_mode()
             elif selection == "ambient":
                 self.run_ambient_mode()
+            elif selection == "auto_hud":
+                self.run_auto_hud_mode()
             elif selection:
                 self.run_demo(selection)
             else:
@@ -441,7 +547,25 @@ if __name__ == "__main__":
     print("=" * 60)
     print("Starting MotiBeam OS v3.0")
     print("Multi-Vertical Ambient Computing Platform")
-    print("New Features: Settings Panel | Ambient Scenes | Auto HUD")
     print("=" * 60)
-    app = MotiBeamV3()
-    app.run()
+    print()
+    print("Core v3.0 Features:")
+    print("  ✓ Settings Panel")
+    print("  ✓ Ambient & Holiday Scenes")
+    print("  ✓ Auto HUD Demo")
+    print()
+
+    # Check which optional modules are available
+    available_count = sum(1 for v in OPTIONAL_MODULES.values() if v is not None)
+    print(f"Optional vertical demos available: {available_count}/6")
+    print()
+    print("=" * 60)
+
+    try:
+        app = MotiBeamV3()
+        app.run()
+    except Exception as e:
+        print(f"\nERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
