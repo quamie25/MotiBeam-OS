@@ -114,7 +114,24 @@ class MotiBeamV3:
         pygame.mouse.set_visible(True)  # Show mouse for settings interaction
 
         print(f"[DEBUG] Screen created: {self.width}x{self.height}")
-        print(f"[DEBUG] Display driver: {pygame.display.get_driver()}")
+        display_driver = pygame.display.get_driver()
+        print(f"[DEBUG] Display driver: {display_driver}")
+
+        # Warn if using offscreen driver
+        if display_driver == "offscreen":
+            print("\n" + "=" * 70)
+            print("⚠️  WARNING: Pygame is using 'offscreen' display driver!")
+            print("=" * 70)
+            print("This means NO WINDOW will appear and NO INPUT will work.")
+            print()
+            print("SOLUTIONS:")
+            print("  1. Run from the Pi desktop terminal (not SSH)")
+            print("  2. If using SSH: export DISPLAY=:0")
+            print("  3. If remote: ssh -X user@host")
+            print("  4. Headless: xvfb-run python3 motibeam_v3.py")
+            print()
+            print("Currently running in headless mode - continuing anyway...")
+            print("=" * 70 + "\n")
 
         self.running = True
         self.clock = pygame.time.Clock()
