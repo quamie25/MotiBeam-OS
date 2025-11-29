@@ -94,9 +94,27 @@ class MotiBeamV3:
         pygame.init()
         self.width = 1280
         self.height = 720
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+
+        # Try windowed mode first for debugging (change to FULLSCREEN later)
+        # Use environment variable to control: MOTIBEAM_FULLSCREEN=1 for fullscreen
+        import os
+        use_fullscreen = os.environ.get('MOTIBEAM_FULLSCREEN', '0') == '1'
+
+        if use_fullscreen:
+            print("[DEBUG] Creating FULLSCREEN display")
+            self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        else:
+            print("[DEBUG] Creating WINDOWED display (800x600)")
+            # Smaller window for Pi - easier to see and interact with
+            self.width = 800
+            self.height = 600
+            self.screen = pygame.display.set_mode((self.width, self.height))
+
         pygame.display.set_caption("MotiBeam OS v3.0")
         pygame.mouse.set_visible(True)  # Show mouse for settings interaction
+
+        print(f"[DEBUG] Screen created: {self.width}x{self.height}")
+        print(f"[DEBUG] Display driver: {pygame.display.get_driver()}")
 
         self.running = True
         self.clock = pygame.time.Clock()
