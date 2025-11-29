@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-MotiBeam OS v4.0 - Complete Application
-Enhanced with global input handling, cinematic display, and robust error management
+MotiBeam OS v4.0 - Patent-Aligned Architecture
+Enhanced with USPTO patent-compliant system architecture
 Core features: Settings Panel, Ambient Scenes, Auto HUD, Global Commands
+Patent-aligned subsystems: Universal Ambient Projection, Context-Aware Rendering
 """
 
 import sys
@@ -29,17 +30,39 @@ except ImportError as e:
     print("Please ensure settings_panel.py, core/scene_manager.py, and vertical_auto.py exist.")
     sys.exit(1)
 
-# Import v4.0 core modules
+# Import PATENT-ALIGNED v4.0 core modules (primary)
+PATENT_MODULES_AVAILABLE = False
 try:
-    from core.input_manager import GlobalInputManager
-    from core.display_manager import DisplayManager
-    from core.error_handler import SystemErrorHandler
-    from config.vertical_config import get_available_verticals, get_vertical_metadata
-    V4_MODULES_AVAILABLE = True
-    print("✓ v4.0 core modules loaded successfully")
+    from core.patent_input_manager import PatentProtectedInputManager
+    from core.patent_display_manager import PatentDisplayManager
+    from core.patent_sos_manager import PatentSOSManager
+    from core.universal_ambient_projection import UniversalAmbientProjection
+    from core.context_aware_projection import ContextAwareProjection
+    from config.patent_vertical_config import (
+        get_patent_verticals,
+        get_patent_vertical_metadata,
+        get_next_vertical
+    )
+    from core.error_handler import SystemErrorHandler  # Keep from v4.0
+    PATENT_MODULES_AVAILABLE = True
+    print("✓ Patent-aligned architecture loaded successfully")
 except ImportError as e:
-    print(f"WARNING: v4.0 modules not available: {e}")
-    V4_MODULES_AVAILABLE = False
+    print(f"WARNING: Patent modules not available: {e}")
+    PATENT_MODULES_AVAILABLE = False
+
+# Fallback: Import v4.0 core modules if patent modules unavailable
+V4_MODULES_AVAILABLE = False
+if not PATENT_MODULES_AVAILABLE:
+    try:
+        from core.input_manager import GlobalInputManager
+        from core.display_manager import DisplayManager
+        from core.error_handler import SystemErrorHandler
+        from config.vertical_config import get_available_verticals, get_vertical_metadata
+        V4_MODULES_AVAILABLE = True
+        print("✓ v4.0 core modules loaded (fallback mode)")
+    except ImportError as e:
+        print(f"WARNING: v4.0 fallback modules not available: {e}")
+        V4_MODULES_AVAILABLE = False
 
 # Import optional demo scenes (graceful fallback if missing)
 OPTIONAL_MODULES = {}
