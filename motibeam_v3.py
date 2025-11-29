@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-MotiBeam OS v3.0 - Complete Application
-Self-contained version with optional vertical demos
-Core features: Settings Panel, Ambient Scenes, Auto HUD
+MotiBeam OS v4.0 - Complete Application
+Enhanced with global input handling, cinematic display, and robust error management
+Core features: Settings Panel, Ambient Scenes, Auto HUD, Global Commands
 """
 
 import sys
@@ -15,6 +15,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, SCRIPT_DIR)
 sys.path.insert(0, os.path.join(SCRIPT_DIR, 'scenes'))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, 'core'))
+sys.path.insert(0, os.path.join(SCRIPT_DIR, 'config'))
 
 import pygame
 
@@ -27,6 +28,18 @@ except ImportError as e:
     print(f"ERROR: Missing core v3 module: {e}")
     print("Please ensure settings_panel.py, core/scene_manager.py, and vertical_auto.py exist.")
     sys.exit(1)
+
+# Import v4.0 core modules
+try:
+    from core.input_manager import GlobalInputManager
+    from core.display_manager import DisplayManager
+    from core.error_handler import SystemErrorHandler
+    from config.vertical_config import get_available_verticals, get_vertical_metadata
+    V4_MODULES_AVAILABLE = True
+    print("✓ v4.0 core modules loaded successfully")
+except ImportError as e:
+    print(f"WARNING: v4.0 modules not available: {e}")
+    V4_MODULES_AVAILABLE = False
 
 # Import optional demo scenes (graceful fallback if missing)
 OPTIONAL_MODULES = {}
@@ -87,54 +100,65 @@ except ImportError:
     OPTIONAL_MODULES['security'] = None
 
 
-class MotiBeamV3:
-    """MotiBeam OS v3.0 - Full Application"""
+class MotiBeamV4:
+    """MotiBeam OS v4.0 - Full Application with Enhanced Core Systems"""
 
     def __init__(self):
         pygame.init()
-        self.width = 1280
-        self.height = 720
 
-        # Try windowed mode first for debugging (change to FULLSCREEN later)
-        # Use environment variable to control: MOTIBEAM_FULLSCREEN=1 for fullscreen
-        import os
-        use_fullscreen = os.environ.get('MOTIBEAM_FULLSCREEN', '0') == '1'
-
-        if use_fullscreen:
-            print("[DEBUG] Creating FULLSCREEN display")
-            self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        # Initialize v4.0 Display Manager (or fallback to v3 display setup)
+        if V4_MODULES_AVAILABLE:
+            self.display_manager = DisplayManager()
+            self.screen = self.display_manager.setup_display()
+            self.width = self.display_manager.width
+            self.height = self.display_manager.height
         else:
-            print("[DEBUG] Creating WINDOWED display (800x600)")
-            # Smaller window for Pi - easier to see and interact with
-            self.width = 800
-            self.height = 600
-            self.screen = pygame.display.set_mode((self.width, self.height))
+            # Fallback to v3.0 display setup
+            self.width = 1280
+            self.height = 720
+            use_fullscreen = os.environ.get('MOTIBEAM_FULLSCREEN', '0') == '1'
 
-        pygame.display.set_caption("MotiBeam OS v3.0")
-        pygame.mouse.set_visible(True)  # Show mouse for settings interaction
+            if use_fullscreen:
+                print("[DEBUG] Creating FULLSCREEN display")
+                self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+            else:
+                print("[DEBUG] Creating WINDOWED display (800x600)")
+                self.width = 800
+                self.height = 600
+                self.screen = pygame.display.set_mode((self.width, self.height))
 
-        print(f"[DEBUG] Screen created: {self.width}x{self.height}")
-        display_driver = pygame.display.get_driver()
-        print(f"[DEBUG] Display driver: {display_driver}")
+            pygame.display.set_caption("MotiBeam OS v4.0")
+            pygame.mouse.set_visible(True)
 
-        # Warn if using offscreen driver
-        if display_driver == "offscreen":
-            print("\n" + "=" * 70)
-            print("⚠️  WARNING: Pygame is using 'offscreen' display driver!")
-            print("=" * 70)
-            print("This means NO WINDOW will appear and NO INPUT will work.")
-            print()
-            print("SOLUTIONS:")
-            print("  1. Run from the Pi desktop terminal (not SSH)")
-            print("  2. If using SSH: export DISPLAY=:0")
-            print("  3. If remote: ssh -X user@host")
-            print("  4. Headless: xvfb-run python3 motibeam_v3.py")
-            print()
-            print("Currently running in headless mode - continuing anyway...")
-            print("=" * 70 + "\n")
+            display_driver = pygame.display.get_driver()
+            print(f"[DEBUG] Display driver: {display_driver}")
+
+            if display_driver == "offscreen":
+                print("\n" + "=" * 70)
+                print("⚠️  WARNING: Pygame is using 'offscreen' display driver!")
+                print("=" * 70)
+                print("This means NO WINDOW will appear and NO INPUT will work.")
+                print()
+                print("SOLUTIONS:")
+                print("  1. Run from the Pi desktop terminal (not SSH)")
+                print("  2. If using SSH: export DISPLAY=:0")
+                print("  3. If remote: ssh -X user@host")
+                print("  4. Headless: xvfb-run python3 motibeam_v3.py")
+                print()
+                print("Currently running in headless mode - continuing anyway...")
+                print("=" * 70 + "\n")
 
         self.running = True
         self.clock = pygame.time.Clock()
+
+        # Initialize v4.0 Input Manager and Error Handler
+        if V4_MODULES_AVAILABLE:
+            self.input_manager = GlobalInputManager(self)
+            self.error_handler = SystemErrorHandler(self)
+            print("✓ v4.0 Input Manager and Error Handler initialized")
+        else:
+            self.input_manager = None
+            self.error_handler = None
 
         # UI State
         self.current_mode = "menu"
@@ -194,9 +218,36 @@ class MotiBeamV3:
             raise
 
     def _build_menu_items(self):
-        """Build menu items based on available modules"""
+        """Build menu items based on available modules (using v4.0 config if available)"""
         self.menu_items = []
 
+        if V4_MODULES_AVAILABLE:
+            # Use v4.0 unified vertical configuration
+            try:
+                verticals = get_available_verticals()
+                for key, name, vertical_class in verticals:
+                    if vertical_class is not None:
+                        metadata = get_vertical_metadata(name)
+                        # Convert tuple color to ensure it's mutable
+                        color = tuple(metadata['color'])
+                        self.menu_items.append({
+                            'key': key,
+                            'name': name,
+                            'symbol': metadata['symbol'],
+                            'color': color,
+                            'vertical_class': vertical_class
+                        })
+                print(f"✓ Built menu with {len(self.menu_items)} vertical demos (v4.0 config)")
+            except Exception as e:
+                print(f"WARNING: Failed to load v4.0 vertical config: {e}")
+                # Fall back to v3 method
+                self._build_menu_items_v3()
+        else:
+            # Fall back to v3.0 menu building
+            self._build_menu_items_v3()
+
+    def _build_menu_items_v3(self):
+        """Build menu items using v3.0 method (fallback)"""
         # Define potential menu items
         potential_items = [
             {"key": "1", "name": "Clinical & Wellness", "symbol": "[+]", "color": self.colors['green'],
@@ -218,7 +269,7 @@ class MotiBeamV3:
             if OPTIONAL_MODULES.get(item['demo']) is not None:
                 self.menu_items.append(item)
 
-        print(f"✓ Built menu with {len(self.menu_items)} available vertical demos")
+        print(f"✓ Built menu with {len(self.menu_items)} available vertical demos (v3.0 fallback)")
 
     def show_boot_screen(self):
         """Display boot sequence (if available)"""
@@ -275,7 +326,15 @@ class MotiBeamV3:
                     print("[DEBUG] QUIT event received")
                     self.running = False
                     menu_running = False
-                elif event.type == pygame.KEYDOWN:
+                    continue
+
+                # v4.0: Handle global commands first (if available)
+                if V4_MODULES_AVAILABLE and self.input_manager:
+                    if self.input_manager.handle_global_commands(event):
+                        # Command handled by global input manager
+                        continue
+
+                if event.type == pygame.KEYDOWN:
                     print(f"[DEBUG] Key pressed: {event.key} (unicode: '{event.unicode}')")
 
                     if event.key == pygame.K_ESCAPE:
@@ -302,7 +361,9 @@ class MotiBeamV3:
                             hover_index = (hover_index + 1) % len(self.menu_items)
                     elif event.key == pygame.K_RETURN:
                         if self.menu_items and hover_index < len(self.menu_items):
-                            selected = self.menu_items[hover_index]["demo"]
+                            # v4.0: Use vertical_class if available, otherwise demo name
+                            item = self.menu_items[hover_index]
+                            selected = item.get('vertical_class') or item.get('demo')
                             menu_running = False
                     elif event.key == pygame.K_a:
                         if self.menu_items:
@@ -312,7 +373,8 @@ class MotiBeamV3:
                         # Handle number keys for direct selection
                         for item in self.menu_items:
                             if event.unicode == item['key']:
-                                selected = item['demo']
+                                # v4.0: Use vertical_class if available, otherwise demo name
+                                selected = item.get('vertical_class') or item.get('demo')
                                 menu_running = False
                                 break
 
@@ -398,47 +460,77 @@ class MotiBeamV3:
                     self.screen.blit(all_surf, all_rect)
 
             # Footer
-            footer_text = "UP/DOWN + ENTER | S/B/H for v3 features | ESC to exit"
+            footer_text = "UP/DOWN + ENTER | S/B/H for v3 features | SPACE for quick menu | ESC to exit"
             footer_surf = self.font_small.render(footer_text, True, self.colors['gray'])
             footer_rect = footer_surf.get_rect(center=(self.width // 2, self.height - 30))
             self.screen.blit(footer_surf, footer_rect)
 
+            # v4.0: Render quick settings overlay if open
+            if V4_MODULES_AVAILABLE and self.input_manager:
+                self.input_manager.render_quick_settings(self.screen)
+
             pygame.display.flip()
             self.clock.tick(30)
+
+            # v4.0: Update cursor visibility based on inactivity
+            if V4_MODULES_AVAILABLE and self.display_manager and self.input_manager:
+                self.display_manager.hide_cursor_after_delay(self.input_manager)
 
         print(f"[DEBUG] Exiting main menu, selected = {selected}")
         return selected
 
-    def run_demo(self, demo_name):
+    def run_demo(self, demo_name_or_class):
         """Run selected vertical demo (if available)"""
-        DemoClass = OPTIONAL_MODULES.get(demo_name)
+        # v4.0: Can accept either a demo name (v3) or a vertical class (v4)
+        if isinstance(demo_name_or_class, str):
+            # v3.0 mode: demo name
+            DemoClass = OPTIONAL_MODULES.get(demo_name_or_class)
+            demo_name = demo_name_or_class
+        else:
+            # v4.0 mode: vertical class
+            DemoClass = demo_name_or_class
+            demo_name = DemoClass.__name__ if hasattr(DemoClass, '__name__') else 'Unknown'
 
         if DemoClass is None:
             print(f"Demo '{demo_name}' not available")
             return
 
-        try:
-            print(f"Launching {demo_name} demo...")
-            demo = DemoClass(standalone=False)
-            demo.screen = self.screen
-            demo.run(duration=300)  # 5 minutes max
-            print(f"{demo_name} demo completed.")
-        except Exception as e:
-            print(f"Error running {demo_name} demo: {e}")
+        # v4.0: Use error handler for safe loading (if available)
+        if V4_MODULES_AVAILABLE and self.error_handler:
+            print(f"Launching {demo_name} demo (v4.0 safe loading)...")
+            vertical_instance = self.error_handler.safe_vertical_loading(DemoClass)
+            if vertical_instance:
+                vertical_instance.screen = self.screen
+                if hasattr(vertical_instance, 'run'):
+                    vertical_instance.run(duration=300)  # 5 minutes max
+                print(f"{demo_name} demo completed.")
+        else:
+            # v3.0 fallback: Direct loading
+            try:
+                print(f"Launching {demo_name} demo...")
+                demo = DemoClass(standalone=False)
+                demo.screen = self.screen
+                demo.run(duration=300)  # 5 minutes max
+                print(f"{demo_name} demo completed.")
+            except Exception as e:
+                print(f"Error running {demo_name} demo: {e}")
 
     def run_all_demos(self):
         """Run all available vertical demos in order"""
-        available_demos = [item['demo'] for item in self.menu_items]
-
-        if not available_demos:
+        if not self.menu_items:
             print("No demos available to run")
             return
 
-        for i, demo_name in enumerate(available_demos):
+        for i, item in enumerate(self.menu_items):
             if not self.running:
                 break
-            print(f"Running demo {i + 1}/{len(available_demos)}: {demo_name}")
-            self.run_demo(demo_name)
+
+            # v4.0: Use vertical_class if available, otherwise use demo name
+            demo = item.get('vertical_class') or item.get('demo')
+            name = item.get('name', 'Unknown')
+
+            print(f"Running demo {i + 1}/{len(self.menu_items)}: {name}")
+            self.run_demo(demo)
 
     def run_settings_mode(self):
         """Run settings panel mode"""
@@ -451,7 +543,14 @@ class MotiBeamV3:
                 if event.type == pygame.QUIT:
                     self.running = False
                     settings_running = False
-                elif event.type == pygame.KEYDOWN:
+                    continue
+
+                # v4.0: Handle global commands first (if available)
+                if V4_MODULES_AVAILABLE and self.input_manager:
+                    if self.input_manager.handle_global_commands(event):
+                        continue
+
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_s:
                         settings_running = False
 
@@ -461,8 +560,16 @@ class MotiBeamV3:
             # Render settings panel
             settings_panel.render_settings_panel(self.screen)
 
+            # v4.0: Render quick settings overlay if open
+            if V4_MODULES_AVAILABLE and self.input_manager:
+                self.input_manager.render_quick_settings(self.screen)
+
             pygame.display.flip()
             self.clock.tick(30)
+
+            # v4.0: Update cursor visibility
+            if V4_MODULES_AVAILABLE and self.display_manager and self.input_manager:
+                self.display_manager.hide_cursor_after_delay(self.input_manager)
 
         print("Settings panel closed.")
 
@@ -492,7 +599,14 @@ class MotiBeamV3:
                 if event.type == pygame.QUIT:
                     self.running = False
                     ambient_running = False
-                elif event.type == pygame.KEYDOWN:
+                    continue
+
+                # v4.0: Handle global commands first (if available)
+                if V4_MODULES_AVAILABLE and self.input_manager:
+                    if self.input_manager.handle_global_commands(event):
+                        continue
+
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_b:
                         ambient_running = False
                     elif event.key == pygame.K_s:
@@ -523,12 +637,20 @@ class MotiBeamV3:
                 self.screen.blit(overlay_text, (20, 20))
 
             # Help text
-            help_text = self.font_small.render("ESC/B: Exit | S: Settings | Ctrl+1-6: Scene shortcuts",
+            help_text = self.font_small.render("ESC/B: Exit | S: Settings | TAB: Next vertical | Ctrl+1-6: Scenes",
                                                True, (150, 150, 150))
             self.screen.blit(help_text, (20, self.height - 50))
 
+            # v4.0: Render quick settings overlay if open
+            if V4_MODULES_AVAILABLE and self.input_manager:
+                self.input_manager.render_quick_settings(self.screen)
+
             pygame.display.flip()
             self.clock.tick(30)
+
+            # v4.0: Update cursor visibility
+            if V4_MODULES_AVAILABLE and self.display_manager and self.input_manager:
+                self.display_manager.hide_cursor_after_delay(self.input_manager)
 
         print("Ambient mode exited.")
 
@@ -551,7 +673,14 @@ class MotiBeamV3:
                 if event.type == pygame.QUIT:
                     self.running = False
                     auto_running = False
-                elif event.type == pygame.KEYDOWN:
+                    continue
+
+                # v4.0: Handle global commands first (if available)
+                if V4_MODULES_AVAILABLE and self.input_manager:
+                    if self.input_manager.handle_global_commands(event):
+                        continue
+
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_h:
                         auto_running = False
 
@@ -560,11 +689,19 @@ class MotiBeamV3:
             vertical_auto.render_auto_vertical(self.screen)
 
             # Help text
-            help_text = self.font_small.render("ESC or H: Exit Auto HUD Demo", True, (150, 150, 150))
+            help_text = self.font_small.render("ESC or H: Exit | TAB: Next vertical | SPACE: Quick menu", True, (150, 150, 150))
             self.screen.blit(help_text, (20, self.height - 50))
+
+            # v4.0: Render quick settings overlay if open
+            if V4_MODULES_AVAILABLE and self.input_manager:
+                self.input_manager.render_quick_settings(self.screen)
 
             pygame.display.flip()
             self.clock.tick(30)
+
+            # v4.0: Update cursor visibility
+            if V4_MODULES_AVAILABLE and self.display_manager and self.input_manager:
+                self.display_manager.hide_cursor_after_delay(self.input_manager)
 
         print("Auto HUD mode exited.")
 
@@ -610,29 +747,36 @@ class MotiBeamV3:
 
         # Cleanup
         pygame.quit()
-        print("MotiBeam OS v3.0 shutdown complete.")
+        print("MotiBeam OS v4.0 shutdown complete.")
 
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("Starting MotiBeam OS v3.0")
+    print("=" * 70)
+    print("Starting MotiBeam OS v4.0")
     print("Multi-Vertical Ambient Computing Platform")
-    print("=" * 60)
+    print("=" * 70)
     print()
-    print("Core v3.0 Features:")
+    print("Core Features:")
     print("  ✓ Settings Panel")
     print("  ✓ Ambient & Holiday Scenes")
     print("  ✓ Auto HUD Demo")
+    if V4_MODULES_AVAILABLE:
+        print()
+        print("v4.0 Enhancements:")
+        print("  ✓ Global Input Handler (ESC/SPACE/TAB/M work everywhere)")
+        print("  ✓ Cinematic Display Mode (auto-hide cursor, fullscreen)")
+        print("  ✓ Unified Vertical Ordering (single config source)")
+        print("  ✓ Robust Error Handling (graceful degradation)")
     print()
 
     # Check which optional modules are available
     available_count = sum(1 for v in OPTIONAL_MODULES.values() if v is not None)
     print(f"Optional vertical demos available: {available_count}/6")
     print()
-    print("=" * 60)
+    print("=" * 70)
 
     try:
-        app = MotiBeamV3()
+        app = MotiBeamV4()
         app.run()
     except Exception as e:
         print(f"\nERROR: {e}")
